@@ -1,0 +1,6 @@
+networkx>=3.0
+pyvis>=0.3
+pyyaml>=6.0
+
+# 可选：Neo4j 后端（仅在使用 --neo4j-uri 时需要）
+# neo4j>=5.0
