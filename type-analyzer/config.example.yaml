@@ -1,0 +1,30 @@
+# 密码不写入配置文件；通过 neo4j.password_env 指定的环境变量传入。
+version: 1
+target:
+  root: /absolute/path/to/go-project
+  # auto: 有 go.mod 时走 module，否则尝试 vendor；也可显式 module/vendor。
+  mode: auto
+  patterns: ["./..."]
+  build:
+    tags: []
+    env: {}
+  vendor:
+    # 仅 mode=vendor 必填。它是项目在传统 GOPATH 中的 import path。
+    # root 若已是 $GOPATH/src/<legacy_import_path>，工具会直接复用该 GOPATH；否则临时复制。
+    legacy_import_path: example.com/acme/service
+analysis:
+  include_stdlib: true
+  include_dependencies: true
+  # 包无法完整 type-check 时记录诊断并继续；strict=true 则失败退出。
+  strict: false
+output:
+  # 非空时导出 CSV（types.csv、methods.csv、implements.csv、embeds.csv、references.csv 等），默认不写 Neo4j。
+  csv_dir: ""
+neo4j:
+  uri: bolt://localhost:7687
+  database: neo4j
+  user: neo4j
+  password_env: TYPE_ANALYZER_NEO4J_PASSWORD
+  batch_size: 1000
+  # 本次导入的图命名空间；同一数据库可并存多次扫描结果。
+  graph_id: default

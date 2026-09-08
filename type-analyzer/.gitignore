@@ -1,0 +1,3 @@
+# 由 scripts/prepare-rclone-testdata.sh 生成；不提交 rclone 源码及其 vendor 快照。
+/testdata/rclone-module/
+/testdata/rclone-vendor/

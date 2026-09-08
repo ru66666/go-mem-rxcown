@@ -1,0 +1,9 @@
+version: 1
+target:
+  root: internal/extract/testdata/module
+  mode: module
+analysis:
+  include_dependencies: false
+  include_stdlib: false
+neo4j:
+  graph_id: smoke
