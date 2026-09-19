@@ -1,0 +1,1047 @@
+         Improving Concurrent GC for Latency Critical Services in
+                         Multi-tenant Systems
+                   Junxian Zhao                                                   Aidi Pi                                        Xiaobo Zhou∗
+              University of Colorado                                    University of Colorado                               University of Colorado
+                Colorado Springs                                          Colorado Springs                                     Colorado Springs
+                    CO, USA                                                   CO, USA                                              CO, USA
+
+                                            Sang-Yoon Chang                                           Chengzhong Xu
+                                           University of Colorado                                    University of Macau
+                                             Colorado Springs                                          Macau, China
+                                                 CO, USA
+ABSTRACT                                                                                     CCS CONCEPTS
+For resource utilization efficiency, la tency cr itical (L C) services                       • Computer systems organization → Cloud computing; • Soft-
+are commonly co-located with best-effort batch jobs in datacenter                            ware and its engineering → Garbage collection.
+servers. Many LC services, such as Cassandra and HBase, run in
+Java Virtual Machine (JVM). We find t hat LC s ervices o ften ex-                            KEYWORDS
+perience heavy-tailed latency due to performance interference of                             Garbage collection, Job co-location, Tail latency, Interference
+the concurrent garbage collection (GC) as well as multi-tenancy.
+                                                                                             ACM Reference Format:
+The root cause is a semantic gap of resource allocation between
+                                                                                             Junxian Zhao, Aidi Pi, Xiaobo Zhou, Sang-Yoon Chang, and Chengzhong
+JVM and the underlying Linux OS in multi-tenant systems. That                                Xu. 2022. Improving Concurrent GC for Latency Critical Services in Multi-
+is, the OS is unaware of the characteristics of different kinds of                           tenant Systems. In 23nd International Middleware Conference (Middleware
+threads in JVM (i.e., GC threads and LC worker threads), which                               ’22), November 7–11, 2022, Quebec City, Quebec, Canada. ACM, New York,
+may lead to GC threads competing for CPUs; JVM is unaware of the                             NY, USA, 13 pages. https://doi.org/10.1145/3464298.3493394
+resource utilization in the OS, which may trigger CPU-intensive
+GC operations when CPUs are busy. Furthermore, we find that                                  1    INTRODUCTION
+co-located batch jobs can interfere with LC services due to Simulta-                         For resource efficiency in cloud computing, latency critical (LC)
+neous Multi-Threading (SMT).                                                                 services such as key-value stores and web search are commonly co-
+    We propose iGC, a middleware that bridges the semantic gap                               located with best-effort batch jobs in datacenter servers. However,
+between JVM and Linux OS and improves concurrent GC perfor-                                  as applications are co-located and contend for shared resources,
+mance in multi-tenant systems. iGC adaptively triggers GC based                              multi-tenancy often leads to severe interference and unpredictable
+on the CPU utilization at runtime, which speeds up the GC process                            performance, especially the heavy-tailed latency for LC services.
+and reduces its CPU contention. Furthermore, iGC deploys a dy-                                  The heavy-tailed latency problem is significant because cloud
+namic CPU scheduling and thread placement strategy to avoid or                               applications are undergoing a major redesign from large, mono-
+mitigate the interference due to concurrent GC and multi-tenancy,                            lithic services to hundreds or thousands of loosely-coupled mi-
+but also improve the cache performance. We implement iGC upon                                croservices [6, 25]. A user request of LC services often triggers
+two state-of-the-art concurrent GC mechanisms ZGC and G1 GC.                                 sub-requests to multiple components across many servers and the
+We conduct its evaluation using three NoSQL databases as LC ser-                             end-to-end response time is largely determined by the slowest in-
+vices. Experimental results show that iGC significantly improves                             dividual latency of the sub-requests [17]. As LC services need to
+the performance of concurrent GC for LC services and the through-                            maintain stable and low latency for user requests, the problem
+put in multi-tenant systems. iGC reduces the p95 tail latency by                             significantly impacts the QoS of cloud computing.
+83%, 37% and 22% for the three LC services Cassandra, HBase and                                 There are growing interests that aim to improve the tail latency
+Solr, respectively. It also increases the throughput of LC services                          of LC services from the perspectives of workload placement [55],
+up to 2.56X.                                                                                 CPU isolation between LC services and batch jobs [31], tail-aware
+∗Corresponding author. Email: xzhou@uccs.edu.                                                caching [4], and resource partitioning [6, 36]. Recently, Caladan [24]
+                                                                                             proposes a new Linux OS scheduler that reduces the tail latency
+                                                                                             in multi-tenant systems via fast core allocation instead of resource
+                                                                                             partitioning. Hermes [46] and Perséphone [20] design reservation-
+                                                                                             based memory allocation and kernel-bypass OS scheduling ap-
+This work is licensed under a Creative Commons Attribution International 4.0 License.        proaches to minimize the tail latency for LC services executing at
+Middleware ’22, November 7–11, 2022, Quebec City, Quebec, Canada                             the microsecond scale, respectively.
+© 2022 Association for Computing Machinery.                                                     In this paper, we tackle the problem of heavy-tailed latency
+ACM ISBN 978-1-4503-8534-3/21/12. . . $15.00
+https://doi.org/10.1145/3464298.3493394                                                      of LC services from two new aspects. First, we identify a new
+                                                                                             interference causing the heavy-tailed latency in JVM-based LC
+
+
+
+
+                                                                                        43
+Middleware ’22, November 7–11, 2022, Quebec City, Quebec, Canada                                                                                   Junxian and Aidi, et al.
+
+
+services, that is, the interference between the concurrent GC threads
+
+
+
+
+                                                                                      READ Latency (ms)
+                                                                                                          800                            default ZGC
+and the worker threads of a LC service. Many LC services, such as                                                                        ZGC w/ thread placement
+Cassandra [1], HBase [2], and Solr [3], run in Java Virtual Machine                                       600
+
+(JVM). JVM provides an easy-scalable, generalized platform for                                            400
+different workloads, which fits well in cloud environments. While                                         200
+Java provides programmers with convenience such as memory
+management, scalability, and compatibility, it also incurs nontrivial                                       0
+                                                                                                             0        50        100         150           200
+overhead of GC. Traditional GC in JVM leads to the Stop The World                                                           Execution Time (sec)
+(STW) problem, which pauses all worker threads [13]. Concurrent
+GC, represented by ZGC [16] (since JDK 11) and G1 GC [22] (since                                          140
+
+
+
+
+                                                                                    UPDATE Latency (ms)
+                                                                                                          120                           default ZGC
+JDK 7u4, the default in JDK 9), runs most phases of GC concurrently                                                                     ZGC w/ thread placement
+                                                                                                          100
+with worker threads of Java applications. It reduces the long pause                                        80
+associated with STW and the full GC. However, it creates severe                                            60
+interfere with the worker threads of LC services.                                                          40
+   The root cause is a semantic gap of resource allocation between                                         20
+JVM and the Linux OS in multi-tenant systems. 1) JVM is unaware                                             0
+                                                                                                             0   20   40   60   80    100 120      140   160    180
+of the available resources in the OS. It triggers GC only based on                                                         Execution Time (sec)
+the status of JVM, which often prolongs the execution time of both
+GC threads and threads of batch jobs that share CPUs with the GC
+                                                                                 Figure 1: Latency of Cassandra operations at runtime.
+threads. 2) The OS is unaware of the characteristics of different
+threads in JVM, which may lead to threads competing for the same
+set of logical CPUs. In such a case, GC threads contend for CPU                  The rest of this paper is organized as follows. Section 2 introduces
+resource with worker threads of LC services in JVM, which prolongs            the background and motivational studies. Sections 3 and 4 describe
+the latency of requests of LC services.                                       iGC design and implementation, respectively. Section 5 presents
+   Second, servers enable Simultaneous Multi-Threading (SMT)                  the testbed setup, experimental results and analysis. Related work
+technology to improve system throughput. Linux OS may schedule                is presented in Section 6. We conclude the work in Section 7.
+different workloads on the logical CPUs running on one physical
+core by SMT technology. As a result, co-located batch jobs can incur          2 BACKGROUND AND MOTIVATIONS
+non-trivial SMT interference with LC services, leading to cache
+contention and longer request latency of LC services.                         2.1 Concurrent GC Interference
+   We propose iGC, a middleware that bridges the semantic gap                 Though concurrent GC is effective in mitigating the STW overhead,
+between JVM and the OS and improves concurrent GC performance                 GC threads compete CPU resources with other threads which can
+in multi-tenant systems. 1) iGC adaptively triggers GC based on the           severely increase the latency of LC services and reduce the system
+available CPU resource at runtime, which speeds up GC process                 throughput. In a multi-tenant system, GC threads compete with
+and reduces its CPU contention. 2) iGC deploys a dynamic CPU                  threads of multiple types of workloads. 1) Different threads within
+scheduling and thread placement strategy to avoid or mitigate the             one JVM compete for CPUs, that is, concurrent GC threads compete
+interference due to concurrent GC and multi-tenancy, but also                 with worker threads, which prolongs the request latency of the LC
+improve the cache performance at the same time.                               service. 2) Threads of batch jobs (batch threads) in one JVM share
+   Specifically, iGC separates GC threads from worker threads of LC           and compete for CPUs with GC threads of a LC service in another
+services by assigning different CPUs for the GC threads and worker            JVM, which prolongs the GC process.
+threads, avoiding the interference. To mitigate SMT interference,                To study the impact of concurrent GC on latency of LC services,
+iGC tries to assign threads of batch jobs and worker threads of               we run Cassandra, a NoSQL database, as the LC service on Java 11
+LC services to different cores. Further, iGC limits the resource              with ZGC. We use YCSB [12] as the benchmark to send requests to
+usage of batch threads when GC threads are co-located with batch              the LC service. The experimental setup is same as that in Section 5.1.
+threads and GC is triggered. As a result, it effectively mitigates the        We compare the default ZGC and ZGC with adaptive thread place-
+contention of memory hierarchy in a multi-tenant system.                      ment. For the default ZGC, GC threads may be scheduled on the
+   We implement iGC as a middleware upon two state-of-the-art                 same set of CPUs that host worker threads of Cassandra. For the
+concurrent GC mechanisms, ZGC and G1 GC. We conduct per-                      ZGC with adaptive thread placement, GC threads are assigned to
+formance evaluation using three representative NoSQL databases                CPUs that do not host worker threads of Cassandra.
+Cassandra, HBase, and Solr as the LC services and Spark KMeans as                Figure 1(a) shows the latency of the Read and Update operations
+the co-located batch jobs. Experimental results show that compared            of Cassandra at runtime. Compared to ZGC with adaptive thread
+to ZGC, iGC reduces the p95 latency by 83%, 37% and 22% for Cas-              placement, the default ZGC leads to more frequent GC activities
+sandra, HBase, and Solr, respectively. It reduces the L1 and L2 cache         and longer GC time. The reason is that worker threads and GC
+miss rate by 55.7% and 54.4%, respectively. It also increases the             threads share the same set of CPUs, leading to severe contention.
+instruction throughput of the LC services up to 2.56X. Compared               The longest latencies are due to the ZGC stalls when there is not
+to G1 GC, iGC reduces the p95 latency by 78% and improves the                 enough memory on the JVM heap for allocation before the GC is
+instruction throughput up to 1.45X for Cassandra.                             finished. Separating ZGC threads and placing them onto CPUs that
+
+
+
+
+                                                                         44
+Improving Concurrent GC for Latency Critical Services in Multi-tenant Systems                                              Middleware ’22, November 7–11, 2022, Quebec City, Quebec, Canada
+
+
+                     30
+                                                                             100
+                          CPU usage                                                                                0.99
+                     25   Trigger GC             119, STW
+                                                                             80
+
+
+
+
+      Latency (ms)                                                                 CPU usage (%)
+                     20
+                                                                             60                              CDF   0.95
+
+                     15
+                                                              16, STW                                                                                                        w/o HT
+                                                                             40
+                     10                                                                                                                                                      w/ HT
+                                                                                                                   0.90
+                                                                             20                                        0           1000        2000       3000        4000            5000
+                      5
+                                                                                                                                             READ Latency (us)
+                     0                                                       0
+                      0         5            10          15             20
+                                                                                                                   0.99
+                                       Execution Time (sec)
+
+
+
+                                                                                                             CDF
+Figure 2: Correlation of GC, CPU utilization, and tail latency.                                                    0.95
+
+
+                                                                                                                                                                             w/o HT
+do not host worker threads of Cassandra can render smaller and                                                                                                               w/ HT
+                                                                                                                   0.90
+more stable latency. By placing GC threads and worker threads                                                          0           1000        2000       3000        4000            5000
+                                                                                                                                            UPDATE Latency (us)
+onto different CPUs, GC runs faster without CPU contention which
+avoids the ZGC allocation stall. As Cassandra employs the log-
+structured merge-tree, the latency of Update operations is relatively                                   Figure 3: The latency CDF of all requests (𝜇𝑠) for Cassandra.
+more fluctuating due to write amplification in which one write
+operation triggers multiple times of physical writes to the disk.
+   We further illustrate the correlation of GC triggering with the                                      thread runs exclusively on the core. The contention of execution
+CPU utilization and latency of Cassandra. We use YCSB workload                                          units on the core delays the execution of both threads. 2) Contention
+A that consists of 50% of Read and 50% of Update operations. We                                         also occurs in memory hierarchy. Two CPUs of the core share
+set the number of requests to 4,000 operations per second. Figure 2                                     resources, especially the memory hierarchy, i.e., L1, L2 caches. As
+shows the request latency and CPU utilization at runtime. The                                           more cache misses lead to more accesses to the next level of the
+average request latency during the runtime is about 0.35𝑚𝑠. A full                                      memory hierarchy, the execution of instructions is prolonged which
+GC is triggered around the 14th second and lasts about 2.4 seconds                                      increases the execution time of batch jobs or LC services [29].
+(the red line). During the GC process, the CPU usage spikes to                                             We use a case study to show the impact of HT on latency of
+nearly 100%, more than 30% higher than the usual. Meanwhile, the                                        LC services in two scenarios. HT is enabled: worker threads of
+latency also increases significantly. There are two peaks of latency                                    Cassandra and batch threads of KMeans run on two CPUs of the
+occurring after the GC start point and before the GC end point due                                      same core, respectively. HT is disabled: worker threads of Cassandra
+to STWs. The first peak of latency is around 119𝑚𝑠. After the first                                     run on one CPU while the other CPU of the core is idle. Figure 3
+STW, it is the concurrent marking phase of GC. During this period,                                      shows the latency of Read and Update operations of Cassandra with
+the average latency jumps to around 3𝑚𝑠, which is about 9x larger                                       HT enabled and disabled. We observe that about 5% of operations
+than the average latency. The second STW is less severe, causing                                        are significantly delayed when HT is enabled. The latency impact
+the request latency to 16𝑚𝑠. Overall, though concurrent GC reduces                                      on LC services is due to the two identified causes, i.e., contention
+the STW overhead, the CPU interference during the concurrent                                            of the execution units and contention in the memory hierarchy.
+marking phase leads to severe degradation of LC service latency.                                        Summary. We summarize the identified issues as below. 1) Garbage
+                                                                                                        Collection is a CPU intense operation. Thus, it should be adaptively
+2.2                  SMT/Hyper-Threading Interference                                                   triggered based on the CPU resource at runtime. 2) Although con-
+SMT has been widely enabled in modern multi-core processors. It                                         current GC reduces the stall of applications, it leads to more CPU
+improves the system throughput by scheduling instructions from                                          interference as it runs in parallel with worker threads of the same
+multiple hardware threads (each is called a logical CPU) in one                                         process. 3) Assigning GC threads and batch threads on the CPUs of
+physical core, which can concurrently utilize different execution                                       the same core severely degrades the tail latency of LC services due
+units on the core. In this paper, we target Intel’s implementation                                      to CPU contention and HT interference.
+of SMT, which is named Hyper-Threading (HT). We use CPU to
+represent logical CPU and core to represent physical core. HT                                           3   IGC DESIGN
+implements a 2-way hardware threads on a physical core. Two                                             We design iGC, a middleware that improves concurrent GC per-
+CPUs on a core share the same pipeline and L1, L2 caches.                                               formance in multi-tenant systems and reduces the latency of LC
+   While HT technique improves the resource efficiency, it also                                         services by addressing the identified issues. iGC centers on two key
+incurs non-trivial overhead to the both hardware threads on the                                         techniques. 1) Adaptive GC triggering. iGC triggers GC adaptively
+core for two reasons. 1) The core is unaware of the hardware threads                                    based on the available CPU resource at runtime to speeds up GC
+from which instructions come. There is not a mechanism that can                                         procedure and reduce its CPU contention. It monitors the CPU
+prioritize a thread with a better opportunity for occupying the                                         usage of servers and dynamically adjusts the time interval between
+pipeline. When two threads run on the two CPUs of the same core,                                        GC operations based on the heap usage of the JVM. 2) Dynamic
+each thread executes instructions slower compared to that one                                           CPU allocation and thread placement. iGC deploys a simple yet
+
+
+
+
+                                                                                                   45
+Middleware ’22, November 7–11, 2022, Quebec City, Quebec, Canada                                                                                 Junxian and Aidi, et al.
+
+
+
+            CPU   CPU
+                                     JVM                                             GC threads are running (scenarios 4 and 5 in Figure 4). One naive
+   1 Core
+                                                                                     way is to remove the allocated CPU from the affinity list of batch
+                                                   Trigger
+                                                     GC                              threads. Here, we choose to set low priority in CPU usage for batch
+   2 Core                                   JMX                        Limit         threads so they can be resumed when GC is finished.
+                          CPU                                          CPU
+                          Usage                    Short Term                        3.2.1 How to trigger GC. iGC decides how to trigger GC at runtime.
+   3 Core                              Monitor
+                                                   Controller
+                                                                                     Instead of modifying the JVM directly, we access JVM information
+   4 Core
+                        Reschedule                                 GC Thread
+                                                                                     and control GC via JMX. JMX obtains the status of Java heap and
+                         Threads      Long Term                 Worker Thread        triggers GC via call system.gc() from outside of the JVM. Algo-
+   5 Core                             Controller                 Batch Thread        rithm 1 shows the operations when GC is triggered. By default, GC
+                                                                 Control Flow        threads may share a CPU with batch threads. If the JVM is started
+                                                                   Data Flow
+                                                                                     with root privilege, GC is triggered directly as the OS scheduler will
+                                                                                     treat it with high priority. If not, GC is triggered if cpu_usage of the
+Figure 4: The architecture of iGC with five CPU and thread                           CPU where GC threads run is smaller than cpu_threshold, which is
+placement scenarios.                                                                 empirically set to 70% to reduce the CPU contention between GC
+                                                                                     and batch threads. Note that with iGC, the GC CPU usage on each
+                                                                                     assigned CPU is around 30%. To speed up GC operations, we set GC
+effective priority-based dynamic CPU allocation and thread place-                    threads with a high priority on the CPUs where GC is triggered. If
+ment strategy to reduce the interference of job co-location and                      the CPU resource is not enough, iGC limits the CPU usage of batch
+improve the cache performance by leveraging HT.                                      threads sharing the same CPU with GC threads by cgroup [11].
+    Figure 4 shows the architecture of iGC. iGC consists of three
+units: 1) Monitor that obtains server resource information, i.e.,                    Algorithm 1 The procedure of triggering GC.
+heap size of the target application, CPU utilization for each core                    1: 𝑐𝑝𝑢 _𝑡ℎ𝑟𝑒𝑠ℎ𝑜𝑙𝑑 : the CPU usage threshold;
+on the server. It uses samples to calculate the speed at which the                    2: 𝑔𝑐 _𝑡ℎ𝑟𝑒𝑎𝑑𝑠 : the list of GC threads;
+heap size grows. 2) Short term controller that triggers GC based                      3: 𝑏𝑎𝑡𝑐ℎ _𝑡ℎ𝑟𝑒𝑎𝑑𝑠 : the list of batch threads sharing CPU with GC threads;
+                                                                                      4: 𝑚𝑜𝑑𝑖 𝑓 𝑦 _𝑏𝑎𝑡𝑐ℎ : a flag to set low priority for batch threads;
+on the information from the other two units. It also limits the                       5: function Trigger_GC(𝑐𝑝𝑢 _𝑢𝑠𝑎𝑔𝑒 )
+resources used by the batch threads when necessary. 3) Long term                      6:     if isRunningWithRootPrivilege() then
+controller that decides the parameters related to GC triggering,                      7:         do GC()
+                                                                                      8:         return
+such as thresholds of heap size, CPU utilization and time interval of                 9:     end if
+GC, and importantly CPU allocation and thread placement. A JVM                       10:     if 𝑐𝑝𝑢 _𝑢𝑠𝑎𝑔𝑒 < 𝑐𝑝𝑢 _𝑡ℎ𝑟𝑒𝑠ℎ𝑜𝑙𝑑 then
+                                                                                     11:         limitCpuUsage(𝑏𝑎𝑡𝑐ℎ _𝑡ℎ𝑟𝑒𝑎𝑑𝑠 );
+is the runtime for a LC service. It contains worker threads and GC                   12:         𝑚𝑜𝑑𝑖 𝑓 𝑦 _𝑏𝑎𝑡𝑐ℎ = 1; //set low priority to batch threads
+threads. In addition, there are batch threads for batch jobs. There                  13:     end if
+are five thread placement scenarios on the two CPUs of a core, i.e.,                 14:     prioritizeThreads(𝑔𝑐 _𝑡ℎ𝑟𝑒𝑎𝑑𝑠 );
+                                                                                     15:     do GC()
+worker and worker, batch and batch, worker and GC, worker and                        16:     if 𝑚𝑜𝑑𝑖 𝑓 𝑦 _𝑏𝑎𝑡𝑐ℎ == 1 then
+batch with GC, and batch and batch with GC. In case of virtualized                   17:         resumeCpuUsage(𝑏𝑎𝑡𝑐ℎ _𝑡ℎ𝑟𝑒𝑎𝑑𝑠 );
+cloud environments, each virtual machine (VM) hosts one iGC that                     18:     end if
+                                                                                     19:     deprioritizeThreads(𝑔𝑐 _𝑡ℎ𝑟𝑒𝑎𝑑𝑠 );
+makes GC triggering and CPU scheduling decisions for the hosted                      20:     return
+applications. Each VM can access multiple cores on the server. Note                  21: end function
+that scenario 3 only occurs when resources are plenty, otherwise, it
+will be transformed to scenario 4 or 5 for higher resource utilization.
+                                                                                     3.2.2 When to trigger GC. There are two conditions for the timing
+                                                                                     of triggering GC, 1) There is enough CPU resource so it proactively
+3.1     Monitor
+                                                                                     triggers GC, and 2) the heap usage increases beyond a threshold
+The monitor periodically collects the resource utilization informa-                  such that GC must be triggered to avoid the allocation stall. iGC
+tion including CPU usage and heap usage of a target JVM. The CPU                     keeps monitoring the heap usage of the JVM and the CPU usage of
+usage is obtained from the file system in Linux OS. The heap usage                   the server. It periodically checks whether GC should be triggered
+of the JVM is obtained through the Java Management Extensions                        by a dynamic time interval I and two thresholds. Threshold A is
+(JMX) framework introduced since Java 1.5 [15]. JMX is an out-of-                    a threshold for the heap usage, below which GC is not triggered
+the-box management tool for monitoring and managing JVM. The                         as there is enough heap space for allocation. iGC tries to trigger
+monitor also tracks the allocation of objects on the Java heap and                   GC when heap_usage is larger than threshold A. In this case, if
+computes the allocation rate. The obtained information is sent to                    heap_usage is not larger than threshold B, it triggers GC if cpu_usage
+the short-term controller and the long-term controller.                              is smaller than cpu_threshold. If heap_usage is larger than threshold
+                                                                                     B, GC is triggered regardless of the value of cpu_usage. Using two
+3.2     Short Term Controller                                                        thresholds reduces the interference to batch threads. To ensure
+The controller manages the adaptive GC triggering procedure. The                     iGC is properly working, the default concurrent GC is disabled.
+logic is shown in Algorithm 1. It triggers GC based on CPU usage,                    Note when the heap size reaches a very high level between iGC
+heap usage, and interval set by Monitor and the long term controller.                samplings, the JVM can still trigger GC to avoid the stall of LC
+It limits the CPU usage of batch threads on the allocated CPU where                  services.
+
+
+
+
+                                                                                46
+Improving Concurrent GC for Latency Critical Services in Multi-tenant Systems                    Middleware ’22, November 7–11, 2022, Quebec City, Quebec, Canada
+
+
+ Table 1: A typical thread list from the JVM of Cassandra.                               iGC Dynamic Thread Placement Strategy. To avoid or mit-
+                                                                                     igate the interference due to concurrent GC and job co-location
+                     Worker Thread & JVM Priority          GC Thread                 but also increase the cache performance, iGC places three types
+                     (5)RMI TCP Accept
+                     (5)MemtableFlushWriter                                          of threads on each core with five scenarios in order, which are
+                     (5)MemtableReclaimMemory                                        illustrated at the left side of Figure 4. 1) It assigns both CPUs of one
+                     (5)SecondaryIndexManagement      ZGC:
+                     (5)ScheduledTasks                ZDriector
+                                                                                     core to worker threads, which avoids the interference from batch
+                     (5)NonPeriodicTasks              ZDriver                        threads and makes use of the memory hierarchy of the core. 2) It
+                     (5)logback#1∼n                   ZStat                          assigns both CPUs of one core to batch threads, which avoids the
+                     (5)RuntimeWorker#0∼n             ZWorker#0∼n
+                     (9)Signal Dispatcher             Sweeper thread                 impact on worker threads. 3) When there are enough CPUs, worker
+         Label
+                     (9)Attach Listener                                              threads and GC threads are assigned to the two CPUs of one core,
+                     (9)C1CompilerThread              G1GC:                          respectively. 4) When CPUs are not enough, GC threads share the
+                     (9)C2CompilerThread              GCThread#0∼n
+                     (9)Service Thread                G1 Conc#0∼n                    CPU with batch threads on one CPU, while worker threads use the
+                     (9)VM Thread                     G1 Refine#0∼n                  other CPU. 5) In the worst scenario, GC threads share one CPU
+                     (9)VM Periodic Task Thread       G1 RemSet Sampling
+                     (10) Reference Handler
+                                                                                     with batch threads, while other batch threads use the other CPU of
+                     (10) Process Reaper                                             the same core.
+                     (10) epollEventLoopGroup                                            The CPU and thread placement is dynamic. Firstly, iGC places
+      JVM Priority                5 ∼10                        10
+       OS Priority                  0                          0
+                                                                                     worker threads and batch threads into different cores (scenarios 1
+                                                                                     and 2). If the CPU usage of the LC service is higher than 90% during
+                                                                                     a sampling interval, one more core is assigned to the LC service.
+3.3     Long Term Controller                                                         If there are more batch jobs and the CPU usage is heavy on batch
+                                                                                     threads, iGC co-locates GC threads with batch threads on one CPU
+This unit has two key functions, dynamic CPU allocation and
+                                                                                     (scenarios 4 and 5) by orchestrating with the Linux OS scheduler.
+thread placement and adaptive monitoring interval. The former
+                                                                                         We discuss three possible co-location scenarios at the CPU level:
+addresses non-trivial CPU contentions between GC threads and
+                                                                                     1) Worker threads and GC threads, 2) batch threads and GC threads,
+worker threads and between batch threads and worker threads. It
+                                                                                     and 3) Worker threads and batch threads.
+also leverages HT for cache performance improvement. The latter
+                                                                                         Worker & GC Worker threads may compete with GC threads
+controls parameters used in GC, including the heap usage threshold,
+                                                                                     when they are placed on the same CPU. However, Linux OS does
+the CPU usage threshold, and the number of GC threads.
+                                                                                     not distinguish the two types of threads at runtime. To address
+3.3.1 Priority-based Dynamic Thread Placement. There is not a                        the problem, we collect information of Java threads from the JVM
+thread scheduler in JVM itself. A JVM sets different priority levels                 as each thread has its own label. Each Java thread in the JVM has
+to Java threads and creates an OS-level thread for each Java thread.                 its corresponding system thread in Linux. Those system threads
+The Linux OS schedules Java threads based on their priority.                         share one process identification (PID). With the obtained labels,
+   JVM Thread Priority. All GC threads are initialized when a                        iGC distinguishes the two types of threads and pins them onto
+JVM starts runtime. We use command jps to get process ID and                         different CPUs, which avoids the contention between the worker
+command jstack to capture the thread dump of the JVM and obtain                      threads and GC threads.
+thread labels and IDs. Table 1 shows the label and priority level                        Batch & GC Though batch threads compete resources with GC
+of all GC threads and representative worker threads in the JVM                       threads, GC is not in the critical path of a LC service as the in-
+of Cassandra. Note that ZGC and G1 GC use different labels for                       terference on GC threads from batch threads will not impact the
+GC threads. We can see that most of the worker threads have JVM                      latency of the LC service. GC threads are only active for a short
+priority levels from 5 to 9, except for the last three threads that                  interval. As long as it finishes before the heap size reaches the limit,
+have the highest priority level 10. All GC threads have the highest                  there is not allocation stall. As a result, GC threads can share CPU
+JVM priority level 10. The last row of the table shows that all JVM                  resources with batch threads. By starting JVMs with root privilege,
+threads are assigned the priority level 0 by the OS when the JVM is                  iGC co-locates GC threads with low-priority batch threads on one
+initiated at user space. As a result, for the JVM running in user space,             CPU for high utilization. It is the Linux OS scheduler that sched-
+GC threads and worker threads are treated equally by the Linux OS                    ules the threads based on their priority. Alternatively, if JVMs are
+scheduler and the use of round-robin time-slicing based scheduling.                  started at user space, iGC prioritizes GC threads by the use of nice
+When the JVM is initiated with root privilege, the priority levels                   command [27] to reduce the interference between batch threads
+of the threads are converted to the OS-level priority levels by the                  and GC threads.
+JVM and the OS schedules the threads based on their priority.                            Worker & Batch Batch threads compete CPU and memory hier-
+   Under both scenarios, the OS is incapable of avoiding or mitigat-                 archy resources with worker threads. Batch threads should not be
+ing the interference between the GC threads and worker threads                       placed in CPUs that execute worker threads.
+by its scheduler itself. If GC threads are assigned with a higher
+priority level than those of worker threads, worker threads will be                  3.3.2 Making use of HT. Two factors are considered when making
+preempted or reduced time slice size when GC is triggered, which                     use of the HT technique, the impact on the memory hierarchy and
+prolongs the request latency. If GC threads are assigned with a                      on the instruction throughput. Sharing the same physical core leads
+lower priority, it may lead to expensive STW problems or even                        to contention on the core-level caches, i.e., L1 data cache, L1 code
+OutOfMemory errors.                                                                  cache, and L2 cache. Each process owns one virtual memory space.
+
+
+
+
+                                                                                47
+Middleware ’22, November 7–11, 2022, Quebec City, Quebec, Canada                                                                    Junxian and Aidi, et al.
+
+
+The data stored in caches can be reused by threads from the same                     iGC daemon process runs with the root privilege to access the
+process. An efficient way that takes advantage of the HT technique                information of resource usages and control resource scheduling
+is to place worker threads on one CPU and GC threads on the                       on servers. It obtains CPU usage information from the Linux file
+other CPU of the same physical core. When worker threads and                      /proc/stat. It samples the CPU usage in each second.
+GC threads of the LC service share two different CPUs on the same                    JMX facilitates programmers to monitor and manage JVM. iGC
+core, they can share the cached data. It reduces the access to the                uses JMX to access the Java heap usage and trigger GC from outside
+lower levels of the memory hierarchy, i.e., LLC cache and the main                of the JVM. With JMX, iGC can be deployed for all Java applications
+memory. In return, the fast data fetching reduces the stall in the                without modifying the source code of applications. When employ-
+instruction pipeline and increases the instruction throughput as                  ing JMX, we assign JMX port number for each Java application
+well.                                                                             when starting the JVM.
+                                                                                     iGC has interfaces to ZGC [16] and G1 GC [22]. Note that iGC
+3.3.3 Adaptive monitoring interval. iGC uses an adaptive monitor-
+                                                                                  and JVM won’t trigger GC threads at the same time as iGC is a
+ing interval (𝐼 ) that is initially set to 5 seconds, and then dynamically
+                                                                                  middleware that triggers GC through JVM GC interface. Once iGC
+changed at runtime according to the heap allocation growth. It aims
+                                                                                  has triggered GC, it will change a status flag in JVM so that no more
+to reduce the possibility of triggering the default GC while reduc-
+                                                                                  GC will be triggered at the same.
+ing the monitoring overhead. Algorithm 2 shows the procedure
+                                                                                     iGC uses scripts to obtain the PIDs of the JVMs for LC services
+of the adaptive monitoring interval. The interval of obtaining the
+                                                                                  and batch jobs. It uses command jstack to capture the JVM thread
+resource usage and heap usage varies in different configurations.
+                                                                                  dump and obtain thread labels and thread IDs. Threads both related
+The frequency of GC is also dynamically changed based on the
+                                                                                  to GC and worker are recognized as worker threads. With the labels
+allocation rate of new objects in the Java heap. The allocation rate
+                                                                                  and thread IDs, iGC distinguishes the GC threads and places them
+is calculated by the number of new objects allocated in Java heap
+                                                                                  onto CPUs according to the priority-based dynamic thread place-
+per second. iGC keeps sampling the allocation rate of new objects
+                                                                                  ment strategy. iGC sets the thread CPU affinity by using taskset
+and computes the new value of the interval.
+                                                                                  command. We use Linux cgroup to adjust the CPU limits for GC
+   In Algorithm 2, parameter u is the coefficient that determines
+                                                                                  threads and batch threads which share the same CPUs. iGC can
+the weight of the new rate and the current rate in the new moni-
+                                                                                  adapt to JVMs in both user space and root privilege. If JVMs are
+toring interval. The formula at line 6 is to get the new interval for
+                                                                                  started at user space, command nice() is used to set GC threads
+triggering GC. The new interval is calculated based on the current
+                                                                                  with higher priority when they are co-located with batch threads to
+interval, the current allocation rate, and the new allocation rate.
+                                                                                  reduce the CPU interference. If JVMs are started with root privilege,
+The allocation rate is volatile in Java heap. Since it changes fre-
+                                                                                  iGC dynamic thread placement avoids or mitigates the interference.
+quently, we choose to give a higher weight for the new allocation
+rate. To reduce the fluctuation from bursty heap allocations, the
+value of u is empirically assigned to 0.2. As a result, the interval of           5 EVALUATION
+triggering GC can adaptively change at runtime.                                   5.1 Evaluation Setup
+                                                                                  We use two servers in the evaluation. Each server has two Intel
+Algorithm 2 Adaptive monitoring interval.                                         Xeon E5-2630 v3 @ 2.40GHz CPUs 16 cores (32 hyper threads in
+ 1: 𝐼 : the time interval of triggering GC;                                       total, L1 cache 320KB (data), 320KB (code), L2 cache 2.5MB, Haswell
+ 2: 𝑐𝑢𝑟 _𝑟𝑎𝑡𝑒 : the current allocation rate of new objects;                       architecture with eight execution units), 32 GB DRAM, and 1TB
+ 3: 𝑢 : the coefficient (0<𝑢 <1);
+ 4: function Test_GC                                                              HDD.
+ 5:      𝑛𝑒𝑤 _𝑟𝑎𝑡𝑒 = getCurrentAllocationRate()                                   LC services. We use three NoSQL databases as LC services, Cassandra-
+ 6:      𝐼 = 𝑢∗𝐼 + (1-𝑢 )∗I∗(𝑛𝑒𝑤 _𝑟𝑎𝑡𝑒 - 𝑐𝑢𝑟 _𝑟𝑎𝑡𝑒 )/𝑐𝑢𝑟 _𝑟𝑎𝑡𝑒 ;                  4.0-beta2, HBase-2.2.7, and Solr-8.8.2. Cassandra, a wide-column
+ 7:       adjustGcThreadNumber(𝑐𝑢𝑟 _𝑟𝑎𝑡𝑒 , 𝑛𝑒𝑤 _𝑟𝑎𝑡𝑒 );
+ 8:       adjustHeapUsageThreshold(𝑐𝑢𝑟 _𝑟𝑎𝑡𝑒 , 𝑛𝑒𝑤 _𝑟𝑎𝑡𝑒 );                       store, is a popular NoSQL database management system that is
+ 9:      𝑐𝑢𝑟 _𝑟𝑎𝑡𝑒 = 𝑛𝑒𝑤 _𝑟𝑎𝑡𝑒 ;                                                  designed to handle large amount of data across servers. HBase runs
+10:       return (𝑛 )
+11: end function                                                                  on top of HDFS [48], providing Google Bigtable-like capabilitiy for
+                                                                                  Hadoop. Solr is a specialized database designed for read only (scan
+                                                                                  is a sequential of reads). They are commonly used as LC services
+                                                                                  for performance evaluation. Three databases are running with JDK
+4    IMPLEMENTATION                                                               11. The heap size of each database is set at 8GB.
+iGC, implemented as a lightweight middleware between JVM and                         We use YCSB [12] as the benchmark to send requests to the
+Linux OS, is written in Bash and C++ with around 1,000 lines of                   LC services. YCSB is an open-source specification and program
+code. The implementation tackles several challenges. Firstly, its                 suite, which is specifically used to compare relative performance
+monitor needs to collect information from the JVM, i.e., different                of NoSQL database management systems. It offers workloads con-
+thread types, heap usage, object allocation rate, but also from the               taining different operations including read, update, insert, and scan.
+Linux OS, i.e., CPU usage for each core. Secondly, iGC needs a                    Table 2 shows five types of workloads and the percentage of opera-
+suitable interface for controlling JVM parameters at runtime. Last                tions in the each workload used in evaluation. As Solr is mainly used
+but not least, iGC needs to be compatible with the two state-of-                  as a search engine, we only use read and scan workloads (Work-
+the-art concurrent GC mechanisms ZGC and G1GC. iGC project is                     loads C and S) for evaluation. Unless mentioned, a YCSB Client
+open source at https://github.com/lotusknight/iGC.                                sends operations in best effort per second in our experiments.
+
+
+
+
+                                                                             48
+Improving Concurrent GC for Latency Critical Services in Multi-tenant Systems                    Middleware ’22, November 7–11, 2022, Quebec City, Quebec, Canada
+
+
+    Table 2: The Percentage of Operations in Workloads.                                      Table 3: The Number of Finished Batch Jobs.
+
+         Operation       READ       UPDATE        INSERT       SCAN                                               Cassandra     HBase       Solr
+         Workload A       50%         50%            0            0                                Co w/ ZGC         189           187      189
+         Workload B       95%         5%             0            0                                Co w/ iGC         185           182      184
+         Workload C       100%         0             0            0                                Standalone                  203
+         Workload D       95%          0            5%            0
+         Workload S         0          0             0          100%
+
+                                                                                        Figure 6 shows the experimental results for HBase workloads.
+Batch jobs. We use Yarn in Hadoop-2.9.2 [49] as the scheduler                        iGC renders the lowest latency for requests almost at all percentiles.
+for batch jobs. Spark-2.1.0 runs KMeans workload from HiBench-                       In HBase, CPU contention is very severe. By placing GC threads
+6.0 [30] as the batch jobs. Batch jobs runs with JDK 8. One server                   and worker threads in different CPUs, iGC is able to mitigate the
+works as the master of Yarn and the client of LC services. The other                 interference while Alone with ZGC does not. Note that the inter-
+serves as the multi-tenant system where LC services and best-effort                  ference from batch jobs results in longer p99 latency under iGC in
+batch jobs are co-located, where iGC is installed. All experiments                   comparison with Alone with ZGC. Importantly, iGC significantly
+were conducted under co-location, unless those marked Alone.                         outperforms co-location with ZGC.
+Approaches. We primarily use ZGC as the concurrent GC in iGC                            Figure 7 shows the experimental results for Solr workloads. iGC
+performance evaluation. ZGC is the latest concurrent GC, which                       renders the best performance under workload C. The alleviation
+is of low latency. We also use the other popular concurrent GC,                      of CPU interference on worker threads leads to smaller latency for
+G1GC, in the evaluation.                                                             most requests. The SCAN operation sequentially reads data, which
+Metrics. We run three NoSQL databases with different workloads to                    leads to higher cache miss rate. As a result, iGC renders results
+evaluate the latency of LC requests and the throughput of LC service                 similar to that due to Alone with ZGC in workload S as it loses the
+and batch jobs. Then, we use cache miss and the number of retired                    advantage of memory hierarchy.
+instructions as metrics to illustrate the benefit of taking advantage                   Figure 8 shows the reduction of the average latency and latency
+of memory hierarchy in iGC. We then test the performance of iGC                      at four specific percentiles by iGC in comparison with ZGC for the
+under different pressure levels. Next, we present the latency of each                three LC services under co-location. Compared with the default
+operation in Cassandra. Finally, we discuss the overhead of iGC.                     ZGC, iGC can reduce the p95 latency by 83% (Workload A), 37%
+                                                                                     (Workload A), and 22% (Workload S) for Cassandra, HBase and Solr,
+5.2     Latency and Throughput                                                       respectively.
+We evaluate the latency of LC services as well as the throughput of
+                                                                                     5.2.2 System Throughput. We measure the throughput of LC ser-
+both LC services and batch jobs using the three NoSQL databases.
+                                                                                     vices in terms of the number of operations per second. Figure 9
+Experiments are conducted in three configurations: 1) LC services
+                                                                                     shows the throughput for each LC service with different workloads
+running alone using ZGC (Alone w/ ZGC), 2) LC services co-located
+                                                                                     by iGC and ZGC under co-location. iGC shows non-trivial through-
+with batch jobs using ZGC (Co /w ZGC), and 3) LC services co-
+                                                                                     put improvement for all eight workloads, because the separation
+located with batch jobs using iGC (Co w/ iGC). Under each con-
+                                                                                     of GC threads and worker threads significantly reduces the CPU
+figuration, we run the experiment for one hour and measure the
+                                                                                     interference on worker threads. Further, it limits the resource usage
+average values.
+                                                                                     of batch threads when GC threads are co-located with batch threads
+5.2.1 Latency Reduction. The tail latency CDF of all requests of LC                  and GC is triggered.
+services Cassandra, HBase and Solr are shown in Figure 5, Figure 6                      To measure the throughput of batch jobs, we count the number
+and Figure 7, respectively. Figure 5 shows that under all three                      of the finished batch jobs. Table 3 shows the number of the finished
+configurations, Alone with ZGC shows the best performance for                        batch jobs in one hour due to iGC and ZGC. As the baseline, the
+all Cassandra workloads as there is no interference. Compared to                     Standalone entry shows the number of batch jobs running alone on
+the co-location with ZGC, co-location with iGC shows significantly                   the server without the resource limit. The throughput of batch jobs
+reduction of the tail latency in the all three workloads, especially                 due to iGC under co-location with Cassandra, HBase and Solr is only
+for workload A. The reason is that iGC places GC threads and                         reduced by 2.2%, 2.6% and 2.7%, respectively. The reduction is due
+worker threads in different CPUs, which mitigates the interference                   to two reasons. First, iGC separates GC threads and worker threads
+of concurrent GC on worker threads of LC services.                                   of LC services onto different CPUs, which uses more CPU resource
+   Under co-location, most of the latency due to iGC and ZGC                         in exchange for lower latency by mitigating the CPU resource
+are concentrated around three values: 500𝜇𝑠 (low latency), 4000𝜇𝑠                    contention. Second, iGC dynamically triggers GC with an adaptive
+(medium latency), and 8000𝜇𝑠 (high latency), which form a stair-like                 time interval, which causes additional CPU resource but reduces
+shape. The reason is that there is a mechanism in Cassandra that                     the interference of GC on batch jobs. The impact of iGC on the
+maintains cache layers to speed up requests. iGC reduces the access                  throughput of batch jobs is trivial, because the STW time interval
+to the next layer as it incurs less contention to memory hierarchy.                  is small in concurrent GC. Under job co-location, the latency and
+As a result, iGC renders 6% (p96-p90) more requests that have low                    throughput of LC services are the dominant performance metrics.
+latency and 2% (p98-p96) more requests that have medium latency                         Due to the space limit, we use Cassandra as the representative
+for workload A, in compared with ZGC.                                                LC service in the following evaluation.
+
+
+
+
+                                                                                49
+Middleware ’22, November 7–11, 2022, Quebec City, Quebec, Canada                                                                                                                     Junxian and Aidi, et al.
+
+
+      0.99                                                                 0.99                                                                    0.99
+
+
+      0.95                                                                 0.95                                                                    0.95
+
+
+
+
+CDF   0.90                                                           CDF   0.90                                                              CDF   0.90
+
+
+                                                  Alone w/ ZGC                                                        Alone w/ ZGC                                                           Alone w/ ZGC
+      0.85                                                                 0.85                                                                    0.85
+                                                  Co w/ ZGC                                                           Co w/ ZGC                                                              Co w/ ZGC
+                                                  Co w/ iGC                                                           Co w/ iGC                                                              Co w/ iGC
+      0.80                                                                 0.80                                                                    0.80
+          0     2000        4000          6000      8000     10000             0     2000        4000          6000     8000     10000                 0   2000        4000          6000      8000      10000
+                             Latency (us)                                                         Latency (us)                                                          Latency (us)
+
+                         (a) Workload A                                                       (b) Workload B                                                        (c) Workload D
+
+
+                                            Figure 5: The tail latency CDF of all requests of three Cassandra workloads.
+
+      0.99                                                                 0.99                                                                    0.99
+
+
+      0.95                                                                 0.95                                                                    0.95
+
+
+
+
+CDF   0.90                                                           CDF   0.90                                                              CDF   0.90
+
+
+                                                  Alone w/ ZGC                                                        Alone w/ ZGC                                                           Alone w/ ZGC
+      0.85                                                                 0.85                                                                    0.85
+                                                  Co w/ ZGC                                                           Co w/ ZGC                                                              Co w/ ZGC
+                                                  Co w/ iGC                                                           Co w/ iGC                                                              Co w/ iGC
+      0.80                                                                 0.80                                                                    0.80
+          0        500             1000           1500       2000              0        500             1000          1500           2000              0      500             1000           1500           2000
+                             Latency (us)                                                         Latency (us)                                                          Latency (us)
+
+                         (a) Workload A                                                       (b) Workload B                                                        (c) Workload D
+
+
+                                                 Figure 6: The tail latency CDF of all requests of three HBase workloads.
+
+                                                         Table 4: The Number of Each Monitor Events in One Minute.
+
+                             Monitor Event                                   Description                                     Event No.      Co w/ ZGC         Co w/ iGC
+                             L1D_PEND_MISS.PENDING                           L1D misses every cycle.                           0148h         130 ∗ 109        57.4 ∗ 109
+                             L2_RQSTS.MISS                                   Requests that missed L2.                          3F24h         154 ∗ 109        70.0 ∗ 109
+                             L1D.REPALCEMENT                                 Lines evicted by new data lines.                  0151h         129 ∗ 109        51.5 ∗ 109
+                             INST_RETIRED.ANY_P                              Instructions at retirement.                       00C0h         44.2 ∗ 109        114 ∗ 109
+                             UOPS_RETIRED.ALL                                Micro-ops retired.                                01C2h         59.6 ∗ 109        130 ∗ 109
+                             UOPS_RETIRED.RETIRE_SLOTS                       Retired slots used in each cycle.                 02C2h         48.8 ∗ 109        109 ∗ 109
+
+
+5.3           HT Impact on Cache Performance                                                                   and 3) the number of cache lines in L1 cache which are evicted by
+We use two dimensions (the cache miss and the instruction through-                                             bringing in new line to L1 cache. Compared with the co-location
+put), three cache metrics, and three types of retired instructions, to                                         with ZGC, iGC reduces the three metrics by 55.7%, 54.4%, and 59.9%,
+evaluate the impact of HT on cache performance under co-location                                               respectively.
+with iGC and ZGC. We use Cassandra workload A in the evaluation.                                                   With HT enabled, GC threads and worker threads are assigned
+We obtain the counter values from the hardware monitor events                                                  to the two CPUs on the same core. Each core shares the same L1
+of the Intel processors. We compare the number of cache misses                                                 cache and L2 cache. With iGC, the L1 cache miss and L2 cache miss
+and the number of retired instructions on a CPU where worker                                                   decrease dramatically. We also use the L1 replacement as the metric.
+threads run. Table 4 gives six monitoring events related to cache                                              It shows that fewer cache lines are replaced by new cache lines in
+performance [14].                                                                                              L1 cache. Compared with the co-location with ZGC, iGC shows less
+   The experiment runs under two different configurations: 1) Worker                                           contention in memory hierarchy. Threads of LC services on both
+threads run on one CPU while GC threads run on the other CPU                                                   CPUs of the same core are from the same JVM. They share the same
+of the same core (co-location w/ iGC), and 2) Worker threads run                                               memory space such as Java heap, so the cache data can be reused
+on one CPU while batch threads run on the other CPU of the same                                                by both threads and the cache misses are reduced. Additionally, it
+core (co-location w/ ZGC).                                                                                     reduces the replacement of cache lines by batch jobs threads, which
+                                                                                                               also reduces the cache miss.
+5.3.1 Cache Miss and Replacement. In Table 4, the first three entries
+show the cache miss of the Cassandra workload due to iGC. We                                                   5.3.2 Retired Instructions. The last three entries in Table 4 give the
+count the operations for one minute for each event. We chose a                                                 number of retired CPU instructions for LC services due to iGC. We
+1-minute time interval as it is long enough to include 10 cycles of                                            count the operations for one minute for each event. Three metrics
+GC for analysis. Three metrics are 1) the number of L1 data cache                                              are 1) the number of all retired instructions, 2) the number of retired
+misses per cycle, 2) the number of requests that missed L2 cache,                                              micro-operations (uops), and 3) the number of retired slots (a.k.a.
+
+
+
+
+                                                                                                    50
+Improving Concurrent GC for Latency Critical Services in Multi-tenant Systems                          Middleware ’22, November 7–11, 2022, Quebec City, Quebec, Canada
+
+
+                     0.99                                                                        Table 5: The average latency (𝜇𝑠) of each operation.
+                     0.95
+                     0.90
+
+                                                                                                         Operations      Co W/ ZGC       Co W/ iGC
+               CDF                                                                                         READ             1,169           860
+                                                                                                          UPDATE            1,010           682
+                                                                 Alone w/ ZGC
+                                                                 Co w/ ZGC                                INSERT            1,052           741
+                                                                 Co w/ iGC                                 SCAN            31,124          35,700
+                     0.50
+                            300   400     500      600    700   800    900     1000
+                                                Latency (us)
+
+                                        (a) Workload C                                             Table 6: The Throughput by iGC upon G1 GC.
+                     0.99
+                     0.95
+                     0.90                                                                               Workload       Cassandra (op/sec)       Batch
+                                                                                                                        A     B       D        (num/h)
+                                                                                                       Co w/ G1GC      1231 849     1240         187
+              CDF    0.50
+                                                                                                        Co w/ iGC      1783 1178 1711            183
+                                                                Alone w/ ZGC
+                                                                Co w/ ZGC
+                                                                Co w/ iGC
+                        0    10000 20000 30000 40000 50000 60000 70000 80000 90000
+                                                                                           We run Cassandra Workload A with different RPS, ranging from
+                                                Latency (us)
+                                                                                           500 to 5,000 with 500 as a step. Figure 11 shows the p95 tail latency
+                                         (b) Workload S                                    due to iGC and ZGC. As the number of RPS increases, the p95
+                                                                                           tail latency also increases. Compared to ZGC, iGC renders smaller
+Figure 7: The tail latency CDF of all requests of two Solr                                 but also more stable tail latency. It shows similar p95 latency from
+workloads.                                                                                 500 to 3,500 RPS. On the other hand, the p95 latency due to ZGC
+                                                                                           deteriorates dramatically after the RPS reaches 2,500. The results
+                                                                                           again demonstrate that iGC has good scalability.
+execution units) used in each clock cycle. There are eight slots in
+Haswell architecture that can be used in each cycle, which means                           5.5    Microscopic View of Each Operation
+eight micro-operations or eight instructions could be retired in                           To evaluate the impact of iGC on each operation in LC services,
+each cycle. Compared with ZGC, iGC improves the three metrics                              we run four Cassandra operations (READ, UPDATE, INSERT, and
+by 2.56X, 2.18X, and 2.23X, respectively.                                                  SCAN) individually. Figure 12 shows the tail latency CDF of all
+   Each instruction consists of several micro-operations. An instruc-                      requests of the four operations. Table 5 gives the average latency
+tion is retired when it is finished on the CPU pipeline. Since iGC                         of each operation due to co-location with ZGC and iGC. iGC re-
+separates GC threads and worker threads onto different CPUs, the                           duces the average latency of three operations READ, UPDATE, and
+interference between GC threads and worker threads is avoided.                             INSERT by 28%, 32%, and 30%, respectively. For SCAN operation,
+As a result, the utilization of the retired slots per cycle is higher, so                  the latency due to iGC is slightly longer than that due to ZGC. The
+are the number of retired instructions and uops. iGC significantly                         reason is that a SCAN operation contains several sequential READ
+increases the throughput of LC services.                                                   operations, which read data from the start to the end in a range.
+                                                                                           When Cassandra runs SCAN as the only operation, the allocation
+5.4     Stress Test and Scalability                                                        rate of new objects in Java heap is very high, which leads to consec-
+We now study the performance of iGC under different client request                         utive GC. In such a case, iGC cannot adaptively trigger GC as GC
+levels. We run Cassandra Workload A with different numbers of                              keeps running. Thus, iGC leads to longer latency for SCAN. How-
+YCSB client threads to evaluate the latency reduction due to iGC in                        ever, SCAN is not a common operation in NoSQL requests. There is
+comparison with ZGC under co-location.                                                     a rare chance that SCAN operations execute one after another. As a
+   Figure 10 shows the CDF of all requests of the tail latency when                        result, iGC obtains the overall better performance for LC services.
+the number of client threads is set to 1, 2, 4, 8, 16, and 32 for iGC
+and ZGC. We can see that iGC obtains marginal improvement for                              5.6    G1 GC
+the p90 and p95 tail latency under 1 and 2 threads. As the number                          In the previous experiments, we compare iGC with the default ZGC.
+of threads increases, the latency reduction due to iGC improves                            Here, we experiment iGC upon G1 GC, another representative
+significantly. The reason is that there are contention among client                        concurrent GC that is the default GC on JDK 9. We use Cassandra
+threads, which increases the interference for CPU resources. With                          with workloads A, B, and D.
+iGC, GC threads are assigned to different CPUs, which avoids the                              Table 6 shows the throughput of Cassandra workloads per sec-
+CPU contention with worker threads. As a result, iGC significantly                         ond and that of batch jobs in one hour. iGC improves Cassandra
+alleviates the degradation of the tail latency. When there are 32                          throughput by 1.45X, 1.38X and 1.37X for workload A, B, and D,
+client threads, the latency reductions for p90, p95, and p99 due to                        respectively. Its impact on the throughput of batch jobs is trivial.
+iGC are 64%, 87%, and 83%, respectively. The results demonstrate                           Note that the latency and throughput of LC services are the primary
+that iGC has better scalability than ZGC.                                                  metrics for job co-location.
+   To further demonstrate the scalability of iGC, we obtain the                               Figure 13 shows that compared to the default G1 GC under co-
+performance of iGC under different request per second (RPS) levels.                        location, iGC reduces the p95 tail latency of Cassandra by 78%, 68%,
+
+
+
+
+                                                                                      51
+Middleware ’22, November 7–11, 2022, Quebec City, Quebec, Canada                                                                                                                                                                                                           Junxian and Aidi, et al.
+
+
+                90                                                                                                                             80
+                80                           Workload A                                                                                        70            Workload A                                                                    Workload C              Workload S
+                                             Workload B                                                                                                      Workload B                                                              20
+                70
+
+
+
+
+Reduction (%)                                                                                                                  Reduction (%)                                                                         Reduction (%)
+                                                                                                                                               60
+                60                           Workload D                                                                                                      Workload D
+                                                                                                                                               50
+                50
+                                                                                                                                               40                                                                                    10
+                40
+                                                                                                                                               30
+                30
+                20                                                                                                                             20
+                                                                                                                                                                                                                                     0
+                10                                                                                                                             10
+                 0                                                                                                                              0
+                                                       avg.               p75         p90          p95          p99                                             avg.        p75    p90       p95       p99                                      avg.     p75             p90       p95           p99
+
+                                                                          (a) Cassandra                                                                                       (b) HBase                                                                      (c) Solr
+
+
+                                                                                      Figure 8: Latency reduction of three LC services with different workloads in iGC.
+
+                                           3000                                                                                                                                                0.99                                              0.99
+                                                                                                                                                           Co w/ ZGC
+                                           2500                                                                                                            Co w/ iGC
+
+
+
+
+                     Througput (ops/sec)
+                                                                                                                                                                                               0.95                                              0.95
+                                           2000
+
+                                           1500
+                                                                                                                                                                                               0.90                                              0.90
+                                           1000
+
+                                            500                                                                                                                                                0.85                                              0.85
+                                                                                                                                                       28 34                                                                    Co w/ ZGC                                      Co w/ ZGC
+                                                     0                                                                                                                                                                          Co w/ iGC                                      Co w/ iGC
+                                                                      A         B           D        A      B           D                      C            S
+                                                                           Cassandra                      HBase                                     Solr                                       0.80                                              0.80
+                                                                                                                                                                                                   0    2    4   6   8               10 12 14        0   2     4     6    8     10 12 14
+                                                                                                                                                                                                                 READ                                               UPDATE
+                                                                                                                                                                                               0.99                                              0.99
+                     Figure 9: The throughput of co-located LC services.                                                                                                                                                                         0.95
+                                                                                                                                                                                                                                                 0.90
+                                                                                                                                                                                               0.95
+
+
+
+                0.99                                                                                            0.99                                                                           0.90
+
+
+
+                                                                                                                                                                                               0.85
+                                                                                                                                                                                                                                Co w/ ZGC                                      Co w/ ZGC
+
+CDF                                                                                                       CDF
+                0.95
+                                                                                            1                   0.95
+                                                                                                                                                                       1                                                        Co w/ iGC                                      Co w/ iGC
+                                                                                            2                                                                          2                       0.80                                              0.50
+                                                                                                                                                                                                   0    2    4   6   8               10 12 14        0       50          100     150       200
+                                                                                            4                                                                          4
+                                                                                                                                                                                                                 INSERT                                               SCAN
+                                                                                            8                                                                          8
+                                                                                            16                                                                         16
+                                                                                            32                                                                         32
+                0.90                                                                                            0.90
+                                                                                                                                                                                       Figure 12: Microscopic view: The tail latency CDF of all
+                    0                       1000 2000 3000 4000 5000 6000                                           0   1000 2000 3000 4000 5000 6000
+                                                               ZGC Latency (us)                                             iGC Latency (us)
+                                                                                                                                                                                       requests (𝑚𝑠) for four Cassandra operations.
+
+
+Figure 10: The tail latency CDF of all requests due to iGC                                                                                                                             is triggered more frequently and the total GC time is prolonged.
+and ZGC under different number of client threads.                                                                                                                                      Longer GC time leads to more CPU resource contention and affects
+                                                                                                                                                                                       more operations of LC services. Thus, iGC is able to reduce the
+                                                               5000                                                                                                                    latency for low percentiles as well.
+                                                                                iGC                                                                                                       Overall, GC demonstrates significant improvement upon both
+                                                               4000             ZGC
+                                                                                                                                                                                       ZGC and G1 GC.
+
+
+                                            P95 Latency (us)
+                                                               3000
+
+                                                                                                                                                                                       5.7     Discussions
+                                                               2000
+                                                                                                                                                                                       iGC Overhead. iGC separates GC threads from worker threads
+                                                               1000
+                                                                                                                                                                                       and place them onto different CPUs. Compared with ZGC or G1
+                                                                  0
+                                                                                                                                                                                       GC, iGC uses one more CPU to run GC threads. Note that overhead
+                                                                           1000             2000          3000              4000                           5000
+                                                                                                         RPS                                                                           of GC is limited at most one CPU in non-work-conserving manner
+                                                                                                                                                                                       regardless of the cluster size. As GC threads are not in the critical
+                                           Figure 11: The p95 latency under different RPS.                                                                                             path of LC services, GC threads can share CPUs with threads of
+                                                                                                                                                                                       batch jobs. Additionally, GC threads only consume CPU resource
+                                                                                                                                                                                       when GC is triggered. In our evaluation, the CPU utilization of GC
+and 72% for workload A, B, and D, respectively. We also notice that                                                                                                                    threads is around 30% of a CPU when GC is running. As long as
+iGC reduces the p80 latency quite significantly, which is not the                                                                                                                      iGC avoids allocation stall, its overhead is less than the capacity of
+case in comparison of iGC with ZGC (as shown in Figure 5). There                                                                                                                       one logical CPU.
+is a mechanism in G1 GC that shortens the pause time for each GC                                                                                                                       iGC Downward Compatibility. Recently, JDK changes the nam-
+cycle. Because of that, GC is only triggered on part of the heap and                                                                                                                   ing convention so that there are many new versions (V11-V17).
+G1 GC reallocates less memory in each GC cycle. As a result, GC                                                                                                                        Currently, JDK 11 is used in production systems. Cassandra and
+
+
+
+
+                                                                                                                                                                                  52
+Improving Concurrent GC for Latency Critical Services in Multi-tenant Systems                               Middleware ’22, November 7–11, 2022, Quebec City, Quebec, Canada
+
+
+      0.99                                                       0.99                                                           0.99
+
+
+      0.95                                                       0.95                                                           0.95
+
+
+
+
+CDF   0.90                                                 CDF   0.90                                                     CDF   0.90
+
+
+
+      0.85                                                       0.85                                                           0.85
+                                         Co w/ G1GC                                                  Co w/ G1GC                                                    Co w/ G1GC
+                                         Co w/ iGC                                                   Co w/ iGC                                                     Co w/ iGC
+      0.80                                                       0.80                                                           0.80
+          0   2000      4000      6000   8000     10000              0   2000      4000      6000    8000       10000               0   2000      4000      6000   8000     10000
+                         Latency (us)                                               Latency (us)                                                   Latency (us)
+
+                     (a) Workload A                                             (b) Workload B                                                 (c) Workload D
+
+
+                 Figure 13: The tail latency CDF of all requests of three Cassandra workloads due to iGC upon G1 GC.
+
+
+Hadoop support JDK 11 runtimes. G1 GC is the state-of-the-art                               Performance Interference and Isolation. Prior work has tackled
+mechanism for JDKs. Thus, iGC uses the newest-compatible Java                               performance interference in cloud systems in several ways. Some
+version and supports downward compatibility.                                                approaches disallow interactive services from sharing resources
+                                                                                            with other applications to avoid interference [36, 47, 50]. Some other
+6        RELATED WORK                                                                       approaches try to avoid co-scheduling applications that are likely
+LC service Optimization. Many studies focus on improving the                                to interfere with each other [18, 39]. The third category of research
+QoS of LC services from the perspective of reducing tail latency [4,                        focus on eliminating interference altogether, by partitioning and
+20, 24, 46, 55]. For example, PerfIso [31] uses native CPU isolation                        isolating resources among co-scheduled services [19, 34–36, 46].
+to achieve CPU sharing between LC services and best-effort batch                            Parties [6] is a representative QoS-aware resource manager that
+jobs. FlatStore [10] is a key-value store that uses logs in persis-                         enables a number of interactive LC services to share a physical
+tent memory for serving data requests. Caladan [24] proposes a                              node without QoS violations. iGC tackles the interference between
+new CPU scheduler in the Linux kerneal that improves QoS of                                 GC threads and the worker threads of LC services, as well as the
+LC services, especially the tail latency. Perséphone [20] is a novel                        interference due to HT.
+kernel-bypass OS scheduler designed to minimize the tail latency                            SMT Optimization. Several studies [21, 33, 53] focus on optimiz-
+for applications executing at the microsecond scale.                                        ing application performance running on SMT servers. Deng [21]
+GC Optimization. There are studies on JVM optimization [5, 22,                              proposes a symbiotic scheduling approach to solve the resource
+28, 28, 38, 40, 43, 44, 52, 54]. For example, Facade [44] implements                        contention between virtual machines on SMT processors. vsmt-
+a compiler framework, which automatically stores data to native                             io [53] proposes to improve I/O performance and efficiency on SMT
+storage. ROLP [5] profiles object lifetime and uses the profiled infor-                     processors in virtualized clouds. iGC proposes to place different
+mation for efficient GC. Recently, Semeru [51] provides a distributed                       kinds of threads onto different CPUs while taking advantage of
+GC that offloads object tracing to memory servers so that tracing is                        memory hierarchy.
+performed closer to data in memory-disaggregated systems. Other
+studies focus on reducing the overhead of object serialization and
+caching intermediate data in memory. Deca [37] transforms ap-                               7       CONCLUSION
+plication code to access native storage directly for performance                            iGC is motivated by the performance degradation due to CPU in-
+improvement. Skyway [42] and FlashByte [54] propose to transfer                             terference between concurrent GC threads and worker threads of
+objects from heap to native storage, which alleviates the serializa-                        LC services. Scheduling GC threads and worker threads onto sep-
+tion overhead. Gerenuk [41] is a compiler and runtime that aims                             arate processing units opens up the opportunity for performance
+to enable a JVM-based data-parallel system to achieve near native                           improvement of LC services. Furthermore, iGC tackles HT interfer-
+efficiency.                                                                                 ence by placing worker threads and batch threads onto different
+Resource Management in Multi-tenant Systems. Many stud-                                     cores, but also takes advantage of HT capability by prioritizing the
+ies [8–10, 23, 26, 32] focus on job scheduling and memory man-                              placement of worker threads and GC threads in the same cores
+agement in multi-tenant systems. For instance, HipsterCo [45] is                            for high cache utilization. iGC is designed and implemented as
+a task scheduler for LC services running on multi-core systems.                             a ready-to-use middleware for JVM-based applications in Linux
+BIG-C [9] is a preemptive, low latency datacenter scheduling frame-                         environments. Experimental results show that iGC significantly
+work via lightweight containers. iTask [23] and UA killer [7] forcibly                      improves the performance of two state-of-the-art concurrent GC
+suspend tasks and performs node-level memory management to                                  mechanisms (ZGC and G1 GC) for LC services and the throughput
+prioritize specific tasks. Hermes [46] offers fast memory allocation                        in multi-tenant systems.
+and proactive reclamation for reducing the latency of LC services                              In future, we plan to examine iGC performance on different types
+under memory pressure. It targets applications written in C. iGC                            of processors and extend it for other OSes.
+is an adaptive CPU allocation and thread placement approach that
+leverages on concurrent GC at runtime to tackle performance in-
+terference and reduce the tail latency of LC services. It targets Java                      8       ACKNOWLEDGMENT
+applications that require GC.                                                               This research was supported in part by U.S. NSF grant CCF-1816850.
+
+
+
+
+                                                                                      53
+Middleware ’22, November 7–11, 2022, Quebec City, Quebec, Canada                                                                                                Junxian and Aidi, et al.
+
+
+REFERENCES                                                                                            on Cloud and Green Computing. Nov. 1-3, 2012, Xiangtan China. IEEE, 145–152.
+ [1] Apache. 2022. Apache Cassandra™. Retrieved Feb. 17, 2022 from https://                           https://doi.org/10.1109/CGC.2012.54
+     cassandra.apache.org/                                                                       [22] David Detlefs, Christine Flood, Steve Heller, and Tony Printezis. 2004. Garbage-
+ [2] Apache. 2022. Apache HBase™. Retrieved May 18, 2022 from https://hbase.                          first garbage collection. In Proceedings of the 4th international symposium on
+     apache.org/                                                                                      Memory management. Oct. 24-25, 2004, Vancouver BC Canada. ACM, New York,
+ [3] Apache. 2022. Apache Solr™. Retrieved May 12, 2022 from https://solr.apache.                     NY, USA, 37–48. https://doi.org/10.1145/1029873.1029879
+     org/                                                                                        [23] Lu Fang, Khanh Nguyen, Guoqing Xu, Brian Demsky, and Shan Lu. 2015. In-
+ [4] Daniel S Berger, Benjamin Berg, Timothy Zhu, Siddhartha Sen, and Mor Harchol-                    terruptible tasks: Treating memory pressure as interrupts for highly scalable
+     Balter. 2018. RobinHood: Tail Latency Aware Caching–Dynamic Reallocation                         data-parallel programs. In Proceedings of the 25th Symposium on Operating Sys-
+     from Cache-Rich to Cache-Poor. In 13th USENIX Symposium on Operating Systems                     tems Principles. Oct. 4-7, 2015, Monterey California. ACM, New York, NY, USA,
+     Design and Implementation (OSDI 18). Oct. 8–10, 2018, CARLSBAD, CA, USA.                         394–409. https://doi.org/10.1145/2815400.2815407
+     USENIX Association, Carlsbad, CA, 195–212. https://doi.org/10.5555/3291168.                 [24] Joshua Fried, Zhenyuan Ruan, Amy Ousterhout, and Adam Belay. 2020. Caladan:
+     3291183                                                                                          Mitigating interference at microsecond timescales. In 14th USENIX Symposium
+ [5] Rodrigo Bruno, Duarte Patricio, José Simão, Luis Veiga, and Paulo Ferreira. 2019.                on Operating Systems Design and Implementation (OSDI 20). Nov. 4-6, 2020, virtual.
+     Runtime object lifetime profiler for latency sensitive big data applications. In                 USENIX Association, 281–297. https://doi.org/10.5555/3488766.3488782
+     Proceedings of the Fourteenth EuroSys Conference 2019. March 25-28, 2019, Dresden           [25] Yu Gan and Christina Delimitrou. 2018. The architectural implications of cloud
+     Germany. ACM, New York, NY, USA, 1–16. https://doi.org/10.1145/3302424.                          microservices. IEEE Computer Architecture Letters 17, 2 (2018), 155–158. https:
+     3303988                                                                                          //doi.org/10.1109/LCA.2018.2839189
+ [6] Shuang Chen, Christina Delimitrou, and José F Martínez. 2019. Parties: Qos-                 [26] Eran Gilad, Edward Bortnikov, Anastasia Braginsky, Yonatan Gottesman, Eshcar
+     aware resource partitioning for multiple interactive services. In Proceedings of the             Hillel, Idit Keidar, Nurit Moscovici, and Rana Shahout. 2020. EvenDB: optimizing
+     Twenty-Fourth International Conference on Architectural Support for Programming                  key-value storage for spatial locality. In Proceedings of the Fifteenth European
+     Languages and Operating Systems. April 13-17, 2019, Providence, Rhode Island, USA.               Conference on Computer Systems. April 27-30, 2020, Heraklion Greece. ACM, New
+     ACM, New York, NY, USA, 107–120. https://doi.org/10.1145/3297858.3304005                         York, NY, USA, 1–16. https://doi.org/10.1145/3342195.3387523
+ [7] Wei Chen, Aidi Pi, Shaoqi Wang, and Xiaobo Zhou. 2019. Os-augmented oversub-                [27] Jambit GmbH. 2021. nice - change process priority. Retrieved Aug. 27, 2021
+     scription of opportunistic memory with a user-assisted oom killer. In Proceedings                from https://man7.org/linux/man-pages/man2/nice.2.html
+     of the 20th International Middleware Conference. Dec. 9-13, 2019, Davis CA USA.             [28] Ionel Gog, Jana Giceva, Malte Schwarzkopf, Kapil Vaswani, Dimitrios Vytiniotis,
+     ACM, New York, NY, USA, 28–40. https://doi.org/10.1145/3361525.3361534                           Ganesan Ramalingam, Manuel Costa, Derek G Murray, Steven Hand, and Michael
+ [8] Wei Chen, Aidi Pi, Shaoqi Wang, and Xiaobo Zhou. 2019. Pufferfish: Container-                    Isard. 2015. Broom: Sweeping out garbage collection from big data systems. In
+     driven elastic memory management for data-intensive applications. In Proceedings                 15th Workshop on Hot Topics in Operating Systems (HotOS XV). May 18-20, 2015,
+     of the ACM Symposium on Cloud Computing. Nov. 20-23, 2019, Santa Cruz CA USA.                    Kartause Ittingen, Switzerland. USENIX Association, USA. https://doi.org/10.
+     ACM, New York, NY, USA, 259–271. https://doi.org/10.1145/3357223.3362730                         5555/2831090.2831092
+ [9] Wei Chen, Jia Rao, and Xiaobo Zhou. 2017. Preemptive, low latency datacenter                [29] Wessam M Hassanein, Layali K Rashid, and Moustafa A Hammad. 2008. Analyzing
+     scheduling via lightweight virtualization. In 2017 USENIX Annual Technical Con-                  the effects of hyperthreading on the performance of data management systems.
+     ference (USENIX ATC 17). July 12–14, 2017, Santa Clara, CA. USENIX Association,                  International Journal of Parallel Programming 36, 2 (2008), 206–225. https:
+     Santa Clara, CA, 251–263. https://doi.org/10.5555/3154690.3154714                                //doi.org/10.1007/s10766-007-0066-x
+[10] Youmin Chen, Youyou Lu, Fan Yang, Qing Wang, Yang Wang, and Jiwu Shu.                       [30] Intel-bigdata. 2020. HiBench Suite. Retrieved Jan. 11, 2022 from https://github.
+     2020. Flatstore: An efficient log-structured key-value storage engine for per-                   com/Intel-bigdata/HiBench
+     sistent memory. In Proceedings of the Twenty-Fifth International Conference                 [31] Călin Iorgulescu, Reza Azimi, Youngjin Kwon, Sameh Elnikety, Manoj Syamala,
+     on Architectural Support for Programming Languages and Operating Systems.                        Vivek Narasayya, Herodotos Herodotou, Paulo Tomita, Alex Chen, Jack Zhang,
+     March 16-20, 2020, Lausanne, Switzerland. ACM, New York, NY, USA, 1077–1091.                     et al. 2018. PerfIso: Performance Isolation for Commercial Latency-Sensitive
+     https://doi.org/10.1145/3373376.3378515                                                          Services. In 2018 USENIX Annual Technical Conference (USENIX ATC 18). July
+[11] The Linux Kernel Development Community. 2012. Control Group v2. Retrieved                        11–13, 2018, Boston, MA, USA. USENIX Association, USA, 519–532. https://doi.
+     Oct. 2015 from https://www.kernel.org/doc/html/v4.18/admin-guide/cgroup-v2.                      org/10.5555/3277355.3277406
+     html                                                                                        [32] Călin Iorgulescu, Florin Dinu, Aunn Raza, Wajih Ul Hassan, and Willy
+[12] Brian F Cooper, Adam Silberstein, Erwin Tam, Raghu Ramakrishnan, and Russell                     Zwaenepoel. 2017. Don’t cry over spilled records: Memory elasticity of data-
+     Sears. 2010. Benchmarking cloud serving systems with YCSB. In Proceedings of                     parallel applications and its application to cluster scheduling. In 2017 USENIX
+     the 1st ACM symposium on Cloud computing. June 10-11, 2010, Indianapolis Indi-                   Annual Technical Conference (USENIX ATC 17). July 12–14, 2017, Santa Clara, CA.
+     ana USA. ACM, New York, NY, USA, 143–154. https://doi.org/10.1145/1807128.                       USENIX Association, Santa Clara, CA, 97–109. https://doi.org/10.5555/3154690.
+     1807152                                                                                          3154700
+[13] Oracle Corperation. 2016. Java Garbage Collection Stop The World Event.                     [33] Weiwei Jia, Jianchen Shan, Tsz On Li, Xiaowei Shang, Heming Cui, and Xiaon-
+     Retrieved May 20, 2016 from https://www.oracle.com/technetwork/tutorials/                        ing Ding. 2020. vSMT-IO: Improving I/O Performance and Efficiency on SMT
+     tutorials-1873457.html                                                                           Processors in Virtualized Clouds. In 2020 USENIX Annual Technical Conference
+[14] Intel Corporation. 2017.           Intel® 64 and IA32 Architectures Per-                         (USENIX ATC 20). July 15–17, 2020, virtual. USENIX Association, USA, 449–463.
+     formance Monitoring Events.                   Retrieved May 18, 2022 from                        https://doi.org/10.5555/3489146.3489176
+     https://software.intel.com/content/www/us/en/develop/download/intel-                        [34] Harshad Kasture, Davide B Bartolini, Nathan Beckmann, and Daniel Sanchez.
+     64-and-ia32-architectures-performance-monitoring-events.html                                     2015. Rubik: Fast analytical power management for latency-critical systems.
+[15] Oracle Corporation. 2022. Java Management Extensions. Retrieved May 18,                          In 2015 48th Annual IEEE/ACM International Symposium on Microarchitecture
+     2022 from https://docs.oracle.com/javase/8/docs/technotes/guides/management/                     (MICRO). Dec. 5-12, 2015, Waikiki, HI, USA. IEEE, 598–610. https://doi.org/10.
+     agent.html                                                                                       1145/2830772.2830797
+[16] Oracle Corporation. 2022. The Z Garbage Collector. Retrieved May 18, 2022                   [35] Palden Lama, Shaoqi Wang, Xiaobo Zhou, and Dazhao Cheng. 2018. Performance
+     from https://openjdk.java.net/projects/zgc/                                                      isolation of data-intensive scale-out applications in a multi-tenant cloud. In
+[17] Jeffrey Dean and Luiz André Barroso. 2013. The tail at scale. Commun. ACM 56,                    2018 IEEE International Parallel and Distributed Processing Symposium (IPDPS).
+     2 (2013), 74–80. https://doi.org/10.1145/2408776.2408794                                         May 21–25, 2018, Vancouver, British Columbia CANADA. IEEE, 85–94. https:
+[18] Christina Delimitrou and Christos Kozyrakis. 2013. Paragon: QoS-aware sched-                     //doi.org/10.1109/IPDPS.2018.00019
+     uling for heterogeneous datacenters. ACM SIGPLAN Notices 48, 4 (2013), 77–88.               [36] David Lo, Liqun Cheng, Rama Govindaraju, Parthasarathy Ranganathan, and
+     https://doi.org/10.1145/2451116.2451125                                                          Christos Kozyrakis. 2015. Heracles: Improving resource efficiency at scale. In
+[19] Christina Delimitrou and Christos Kozyrakis. 2017. Bolt: I know what you did                     Proceedings of the 42nd Annual International Symposium on Computer Architecture.
+     last summer... in the cloud. ACM SIGARCH Computer Architecture News 45, 1                        June 13-17, 2015, Portland Oregon. 450–462. https://doi.org/10.1145/2749469.
+     (2017), 599–613. https://doi.org/10.1145/3093337.3037703                                         2749475
+[20] Henri Maxime Demoulin, Joshua Fried, Isaac Pedisich, Marios Kogias, Boon Thau               [37] Lu Lu, Xuanhua Shi, Yongluan Zhou, Xiong Zhang, Hai Jin, Cheng Pei, Ligang He,
+     Loo, Linh Thi Xuan Phan, and Irene Zhang. 2021. When Idling is Ideal: Optimiz-                   and Yuanzhen Geng. 2016. Lifetime-Based Memory Management for Distributed
+     ing Tail-Latency for Heavy-Tailed Datacenter Workloads with Perséphone. In                       Data Processing Systems. Proc. VLDB Endow. 9, 12 (2016). https://doi.org/10.
+     Proceedings of the ACM SIGOPS 28th Symposium on Operating Systems Principles.                    14778/2994509.2994513
+     Oct. 26-29, 2021, Virtual Event Germany. ACM, New York, NY, USA, 621–637.                   [38] Martin Maas, Tim Harris, Krste Asanović, and John Kubiatowicz. 2015. Trash
+     https://doi.org/10.1145/3477132.3483571                                                          day: Coordinating garbage collection in distributed systems. In 15th Workshop on
+[21] Kefeng Deng, Kaijun Ren, and Junqiang Song. 2012. Symbiotic scheduling for                       Hot Topics in Operating Systems (HotOS XV). May 18-20, 2015, Kartause Ittingen,
+     virtual machines on smt processors. In 2012 Second International Conference                      Switzerland. USENIX Association, USA. https://doi.org/10.5555/2831090.2831091
+
+
+
+
+                                                                                            54
+Improving Concurrent GC for Latency Critical Services in Multi-tenant Systems                                   Middleware ’22, November 7–11, 2022, Quebec City, Quebec, Canada
+
+
+[39] Jason Mars and Lingjia Tang. 2013. Whare-map: Heterogeneity in" homogeneous"                [48] Konstantin Shvachko, Hairong Kuang, Sanjay Radia, and Robert Chansler. 2010.
+     warehouse-scale computers. In Proceedings of the 40th Annual International Sym-                  The hadoop distributed file system. In 2010 IEEE 26th symposium on mass storage
+     posium on Computer Architecture. June 23-27, 2013, Tel-Aviv Israel, Vol. 41. ACM,                systems and technologies (MSST). May 3-7, 2010, Lake Tahoe, Nevada, USA. IEEE,
+     New York, NY, USA, 619–630. https://doi.org/10.1145/2508148.2485975                              1–10. https://doi.org/10.1109/MSST.2010.5496972
+[40] Kris Mok. 2011. JVM@Taobao. Retrieved Oct. 24, 2011 from https://www.                       [49] Vinod Kumar Vavilapalli, Arun C Murthy, Chris Douglas, Sharad Agarwal, Ma-
+     slideshare.net/RednaxelaFX/jvm-taobao                                                            hadev Konar, Robert Evans, Thomas Graves, Jason Lowe, Hitesh Shah, Sid-
+[41] Christian Navasca, Cheng Cai, Khanh Nguyen, Brian Demsky, Shan Lu, Miryung                       dharth Seth, et al. 2013. Apache hadoop yarn: Yet another resource nego-
+     Kim, and Guoqing Harry Xu. 2019. Gerenuk: thin computation over big native                       tiator. In Proceedings of the 4th annual Symposium on Cloud Computing. Oct.
+     data using speculative program transformation. In Proceedings of the 27th ACM                    1-3, 2013, Santa Clara California. ACM, New York, NY, USA, 1–16. https:
+     Symposium on Operating Systems Principles. Oct. 27-30, 2019, Huntsville Ontario                  //doi.org/10.1145/2523616.2523633
+     Canada. ACM, New York, NY, USA, 538–553. https://doi.org/10.1145/3341301.                   [50] Abhishek Verma, Luis Pedrosa, Madhukar Korupolu, David Oppenheimer, Eric
+     3359643                                                                                          Tune, and John Wilkes. 2015. Large-Scale Cluster Management at Google with
+[42] Khanh Nguyen, Lu Fang, Christian Navasca, Guoqing Xu, Brian Demsky, and                          Borg. In Proceedings of the Tenth European Conference on Computer Systems. April
+     Shan Lu. 2018. Skyway: Connecting managed heaps in distributed big data                          21-24, 2015, Bordeaux France. Association for Computing Machinery, New York,
+     systems. ACM SIGPLAN Notices 53, 2 (2018), 56–69. https://doi.org/10.1145/                       NY, USA, 1–17. https://doi.org/10.1145/2741948.2741964
+     3173162.3173200                                                                             [51] Chenxi Wang, Haoran Ma, Shi Liu, Yuanqi Li, Zhenyuan Ruan, Khanh Nguyen,
+[43] Khanh Nguyen, Lu Fang, Guoqing Xu, Brian Demsky, Shan Lu, Sanazsadat                             Michael D Bond, Ravi Netravali, Miryung Kim, and Guoqing Harry Xu. 2020.
+     Alamian, and Onur Mutlu. 2016. Yak: A High-Performance Big-Data-Friendly                         Semeru: A Memory-Disaggregated Managed Runtime. In 14th USENIX Symposium
+     Garbage Collector. In 12th USENIX Symposium on Operating Systems Design                          on Operating Systems Design and Implementation (OSDI 20). Nov. 4-6, 2020, virtual.
+     and Implementation (OSDI 16). Nov. 2–4, 2016, SAVANNAH, GA, USA. USENIX                          USENIX Association, USA, 261–280. https://doi.org/10.5555/3488766.3488781
+     Association, USA, 349–365. https://doi.org/10.5555/3026877.3026905                          [52] Jingjing Wang and Magdalena Balazinska. 2017. Elastic memory management
+[44] Khanh Nguyen, Kai Wang, Yingyi Bu, Lu Fang, Jianfei Hu, and Guoqing Xu.                          for cloud data analytics. In 2017 USENIX Annual Technical Conference (USENIX
+     2015. Facade: A compiler and runtime for (almost) object-bounded big data                        ATC 17). July 12–14, 2017, Santa Clara, CA. USENIX Association, USA, 745–758.
+     applications. ACM SIGARCH Computer Architecture News 43, 1 (2015), 675–690.                      https://doi.org/10.5555/3154690.3154760
+     https://doi.org/10.1145/2775054.2694345                                                     [53] Xi Yang, Stephen M Blackburn, and Kathryn S McKinley. 2016. Elfen Scheduling:
+[45] Rajiv Nishtala, Paul Carpenter, Vinicius Petrucci, and Xavier Martorell. 2017.                   Fine-GrainPrincipled Borrowing from Latency-Critical Workloads Using Simul-
+     Hipster: Hybrid task manager for latency-critical cloud workloads. In 2017 IEEE                  taneous Multithreading. In 2016 USENIX Annual Technical Conference (USENIX
+     International Symposium on High Performance Computer Architecture (HPCA). Feb.                   ATC 16). July 12-14, 2017, Santa Clara, CA. USENIX Association, USA, 309–322.
+     4-8 2017, Austin, Texas. IEEE, 409–420. https://doi.org/10.1109/HPCA.2017.13                     https://doi.org/10.5555/3026959.3026988
+[46] Aidi Pi, Junxian Zhao, Shaoqi Wang, and Xiaobo Zhou. 2021. Memory at your                   [54] Junxian Zhao, Aidi Pi, Shaoqi Wang, and Xiaobo Zhou. 2021. Flashbyte: Im-
+     service: fast memory allocation for latency-critical services. In Proceedings of the             proving memory efficiency with lightweight native storage. In 2021 IEEE/ACM
+     22nd International Middleware Conference. Dec. 6-10, 2021, Québec city Canada.                   21st International Symposium on Cluster, Cloud and Internet Computing (CCGrid).
+     ACM, New York, NY, USA, 185–197. https://doi.org/10.1145/3464298.3493394                         May 10-13, 2021, Melbourne, Australia. IEEE, 61–70. https://doi.org/10.1109/
+[47] Malte Schwarzkopf, Andy Konwinski, Michael Abd-El-Malek, and John Wilkes.                        CCGrid51090.2021.00016
+     2013. Omega: Flexible, Scalable Schedulers for Large Compute Clusters. In                   [55] Timothy Zhu, Michael A Kozuch, and Mor Harchol-Balter. 2017. Workload-
+     Proceedings of the 8th ACM European Conference on Computer Systems. April                        compactor: Reducing datacenter cost while providing tail latency slo guar-
+     15-17, 2013, Prague Czech Republic. ACM, New York, NY, USA, 351–364. https:                      antees. In Proceedings of the 2017 Symposium on Cloud Computing. Sept. 24-
+     //doi.org/10.1145/2465351.2465386                                                                27, 2017, Santa Clara California. ACM, New York, NY, USA, 598–610. https:
+                                                                                                      //doi.org/10.1145/3127479.3132245
+
+
+
+
+                                                                                            55
+
