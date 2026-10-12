@@ -1,0 +1,1116 @@
+{
+  "metadata": {
+    "title": "池化内存管理与 CPU/XPU 协同：文献、工具与研究组",
+    "language": "zh-CN",
+    "updated_at": "2026-10-12",
+    "scope": [
+      "CXL/远端或分解式内存池",
+      "CPU-XPU/GPU 统一内存与协同管理",
+      "内存分配器、运行时、设备管理与观测工具",
+      "Go 语言相关库、运行时及研究/工程生态"
+    ],
+    "selection_note": "面向系统软件和研究原型的定向梳理，不是穷尽式系统综述。条目分为直接相关、邻近支撑和背景综述。论文 DOI 指向出版商元数据页；代码和工具优先给出项目或官方文档链接。",
+    "terminology": {
+      "memory_pooling": "将分散或专用的内存容量按需汇集、分配与回收；本资料主要指 CXL/远端内存池，也涵盖 GPU/加速器显存池。",
+      "cpu_xpu_coordination": "CPU、GPU 或其他加速器在地址空间、内存放置、迁移、分配、带宽/QoS 与生命周期上的协同。",
+      "scope_warning": "CXL 内存池、GPU 显存分配器、统一虚拟内存和 Go sync.Pool 是不同层次的机制；相似的“pool”名称不代表可互换。"
+    },
+    "sources_and_method": [
+      {
+        "name": "OpenAlex works index",
+        "url": "https://openalex.org/",
+        "use": "发现及交叉核对论文标题、作者、年份、DOI、出版物。"
+      },
+      {
+        "name": "Crossref DOI metadata",
+        "url": "https://www.crossref.org/",
+        "use": "DOI 元数据交叉核验入口。"
+      },
+      {
+        "name": "Linux kernel CXL documentation",
+        "url": "https://docs.kernel.org/driver-api/cxl/",
+        "use": "核对 CXL/Linux 内核工具链与设备模型。"
+      },
+      {
+        "name": "Go package and runtime documentation",
+        "url": "https://pkg.go.dev/",
+        "use": "核对 Go 标准库与 Go 包用途。"
+      },
+      {
+        "name": "GitHub projects and official manuals",
+        "url": "https://github.com/",
+        "use": "核对项目主页、代码语言和功能定位；活跃度会变化。"
+      }
+    ]
+  },
+  "literature": [
+    {
+      "id": "L01",
+      "title": "Pond: CXL-Based Memory Pooling Systems for Cloud Platforms",
+      "year": 2023,
+      "type": "conference paper",
+      "venue": "ASPLOS",
+      "authors": [
+        "Huaicheng Li",
+        "Daniel S. Berger",
+        "Lisa Hsu",
+        "Daniel Ernst",
+        "Pantea Zardoshti",
+        "Stanko Novaković",
+        "Monish Shah",
+        "Samir Rajadnya"
+      ],
+      "doi": "10.1145/3575693.3578835",
+      "url": "https://doi.org/10.1145/3575693.3578835",
+      "relation": "direct",
+      "summary": "代表性的 CXL 云内存池系统工作，研究池化容量如何服务云平台工作负载及系统软件如何管理资源。适合作为架构与动机起点。",
+      "tags": [
+        "CXL",
+        "memory pooling",
+        "cloud"
+      ]
+    },
+    {
+      "id": "L02",
+      "title": "Memory Pooling With CXL",
+      "year": 2023,
+      "type": "journal/magazine article",
+      "venue": "IEEE Micro",
+      "authors": [
+        "Donghyun Gouk",
+        "Miryeong Kwon",
+        "Hanyeoreum Bae",
+        "Sangwon Lee",
+        "Myoungsoo Jung"
+      ],
+      "doi": "10.1109/mm.2023.3237491",
+      "url": "https://doi.org/10.1109/mm.2023.3237491",
+      "relation": "direct",
+      "summary": "介绍 CXL 内存池架构与设计空间，适合作为 CXL pooling 的入门概览。",
+      "tags": [
+        "CXL",
+        "memory pooling",
+        "overview"
+      ]
+    },
+    {
+      "id": "L03",
+      "title": "A Case Against CXL Memory Pooling",
+      "year": 2023,
+      "type": "workshop paper",
+      "venue": "HotNets",
+      "authors": [
+        "Philip A. Levis",
+        "Kun Lin",
+        "Amy Tai"
+      ],
+      "doi": "10.1145/3626111.3628195",
+      "url": "https://doi.org/10.1145/3626111.3628195",
+      "relation": "direct",
+      "summary": "从成本、性能和实际部署假设方面质疑 CXL pooling 的收益。建议与支持 pooling 的系统论文对读，检查工作负载、带宽、扩展和利用率假设。",
+      "tags": [
+        "CXL",
+        "critique",
+        "deployment"
+      ]
+    },
+    {
+      "id": "L04",
+      "title": "Dynamic Capacity Service for Improving CXL Pooled Memory Efficiency",
+      "year": 2023,
+      "type": "journal/magazine article",
+      "venue": "IEEE Micro",
+      "authors": [
+        "Minho Ha",
+        "Junhee Ryu",
+        "Jungmin Choi",
+        "Kwang-Jin Ko",
+        "Sunwoong Kim",
+        "Sung-woo Hyun",
+        "Donguk Moon",
+        "Byungil Koh"
+      ],
+      "doi": "10.1109/mm.2023.3237756",
+      "url": "https://doi.org/10.1109/mm.2023.3237756",
+      "relation": "direct",
+      "summary": "聚焦池化内存容量的动态服务与利用率，适合研究容量分配策略和资源管理接口。",
+      "tags": [
+        "CXL",
+        "dynamic capacity",
+        "management"
+      ]
+    },
+    {
+      "id": "L05",
+      "title": "Evaluating Emerging CXL-enabled Memory Pooling for HPC Systems",
+      "year": 2022,
+      "type": "conference paper",
+      "venue": "MCHPC",
+      "authors": [
+        "Jacob Wahlgren",
+        "Maya B. Gokhale",
+        "Ivy B. Peng"
+      ],
+      "doi": "10.1109/MCHPC56545.2022.00007",
+      "url": "https://doi.org/10.1109/MCHPC56545.2022.00007",
+      "relation": "direct",
+      "summary": "从 HPC 系统角度评估 CXL 内存池，适合作为性能评估指标和 HPC 场景的参考。",
+      "tags": [
+        "CXL",
+        "HPC",
+        "evaluation"
+      ]
+    },
+    {
+      "id": "L06",
+      "title": "CXLMemUring: A Hardware Software Co-design Paradigm for Asynchronous and Flexible Parallel CXL Memory Pool Access",
+      "year": 2023,
+      "type": "preprint",
+      "venue": "arXiv",
+      "authors": [
+        "Yiwei Yang",
+        "Yusheng Zheng",
+        "Kexin Chu",
+        "Jianchang Su",
+        "Jesun Firoz",
+        "Andi Quinn"
+      ],
+      "doi": "10.48550/arXiv.2309.04011",
+      "url": "https://arxiv.org/abs/2309.04011",
+      "relation": "direct",
+      "summary": "探索基于 io_uring 的异步、并行 CXL 池访问路径，适合关注数据面延迟、并发和异步 API 的读者。预印本，阅读时应核对后续版本。",
+      "tags": [
+        "CXL",
+        "io_uring",
+        "async"
+      ]
+    },
+    {
+      "id": "L07",
+      "title": "TPP: Transparent Page Placement for CXL-Enabled Tiered-Memory",
+      "year": 2023,
+      "type": "conference paper",
+      "venue": "ASPLOS",
+      "authors": [
+        "Hasan Al Maruf",
+        "Hao Henry Wang",
+        "Abhishek Dhanotia",
+        "Johannes Weiner",
+        "Niket Agarwal",
+        "Pallab Bhattacharya",
+        "Chris Petersen",
+        "Mosharaf Chowdhury"
+      ],
+      "doi": "10.1145/3582016.3582063",
+      "url": "https://doi.org/10.1145/3582016.3582063",
+      "relation": "direct",
+      "summary": "通过透明页放置管理 CXL 分层内存，重点在页迁移和冷热页识别。虽是 tiering 而非所有定义下的共享池，但和 CPU 侧池化内存管理高度相关。",
+      "tags": [
+        "CXL",
+        "tiered memory",
+        "page placement"
+      ]
+    },
+    {
+      "id": "L08",
+      "title": "Clio: A Hardware-Software Co-Designed Disaggregated Memory System",
+      "year": 2022,
+      "type": "conference paper",
+      "venue": "ASPLOS",
+      "authors": [
+        "Zhiyuan Guo",
+        "Yizhou Shan",
+        "Xuhao Luo",
+        "Yutong Huang",
+        "Yiying Zhang"
+      ],
+      "doi": "10.1145/3503222.3507762",
+      "url": "https://doi.org/10.1145/3503222.3507762",
+      "relation": "direct",
+      "summary": "硬件/软件协同设计的分解式内存系统，提供 CXL 之外的远端池化内存架构参照。",
+      "tags": [
+        "disaggregated memory",
+        "hardware-software co-design"
+      ]
+    },
+    {
+      "id": "L09",
+      "title": "A Disaggregated Memory System for Deep Learning",
+      "year": 2019,
+      "type": "journal/magazine article",
+      "venue": "IEEE Micro",
+      "authors": [
+        "Youngeun Kwon",
+        "Minsoo Rhu"
+      ],
+      "doi": "10.1109/MM.2019.2929165",
+      "url": "https://doi.org/10.1109/MM.2019.2929165",
+      "relation": "direct",
+      "summary": "较早研究深度学习系统中的分解式内存，适合了解加速器工作负载与远端容量的结合动机。",
+      "tags": [
+        "disaggregated memory",
+        "deep learning"
+      ]
+    },
+    {
+      "id": "L10",
+      "title": "DRackSim: Simulating CXL-enabled Large-Scale Disaggregated Memory Systems",
+      "year": 2024,
+      "type": "conference paper",
+      "venue": "SIGSIM-PADS",
+      "authors": [
+        "Amit Puri",
+        "Kartheek Bellamkonda",
+        "Kailash Narreddy",
+        "John Jose",
+        "Venkatesh Tamarapalli",
+        "Vijaykrishnan Narayanan"
+      ],
+      "doi": "10.1145/3615979.3656059",
+      "url": "https://doi.org/10.1145/3615979.3656059",
+      "relation": "direct",
+      "summary": "CXL 分解式内存系统模拟器，适合在硬件不可用时探索大规模拓扑与策略。",
+      "tags": [
+        "CXL",
+        "simulation",
+        "disaggregation"
+      ]
+    },
+    {
+      "id": "L11",
+      "title": "Nimble Page Management for Tiered Memory Systems",
+      "year": 2019,
+      "type": "conference paper",
+      "venue": "ASPLOS",
+      "authors": [
+        "Zi Yan",
+        "Daniel Lustig",
+        "David W. Nellans",
+        "Abhishek Bhattacharjee"
+      ],
+      "doi": "10.1145/3297858.3304024",
+      "url": "https://doi.org/10.1145/3297858.3304024",
+      "relation": "adjacent",
+      "summary": "研究分层内存页管理，可作为 CXL tiering 策略与页迁移设计的基础参考。",
+      "tags": [
+        "tiered memory",
+        "page management"
+      ]
+    },
+    {
+      "id": "L12",
+      "title": "An Adaptive Framework for Oversubscription Management in CPU-GPU Unified Memory",
+      "year": 2021,
+      "type": "conference paper",
+      "venue": "DATE",
+      "authors": [
+        "Debashis Ganguly",
+        "Rami Melhem",
+        "Jun Yang"
+      ],
+      "doi": "10.23919/DATE51398.2021.9473982",
+      "url": "https://doi.org/10.23919/DATE51398.2021.9473982",
+      "relation": "direct",
+      "summary": "面向 CPU-GPU Unified Memory 超额订阅的自适应管理，关注容量压力和迁移行为。",
+      "tags": [
+        "CPU-GPU",
+        "unified memory",
+        "oversubscription"
+      ]
+    },
+    {
+      "id": "L13",
+      "title": "Analyzing Memory Management Methods on Integrated CPU-GPU Systems",
+      "year": 2017,
+      "type": "conference paper",
+      "venue": "ISMM",
+      "authors": [
+        "Mohammad Dashti",
+        "Alexandra Fedorova"
+      ],
+      "doi": "10.1145/3092255.3092256",
+      "url": "https://doi.org/10.1145/3092255.3092256",
+      "relation": "direct",
+      "summary": "对集成 CPU-GPU 系统的内存管理方法进行分析，适合作为统一/分离内存行为对照。",
+      "tags": [
+        "CPU-GPU",
+        "integrated systems",
+        "memory management"
+      ]
+    },
+    {
+      "id": "L14",
+      "title": "Building Heterogeneous Unified Virtual Memories (UVMs) without the Overhead",
+      "year": 2016,
+      "type": "journal article",
+      "venue": "ACM Transactions on Architecture and Code Optimization",
+      "authors": [
+        "Konstantinos Koukos",
+        "Alberto Ros",
+        "Erik Hägersten",
+        "Stefanos Kaxiras"
+      ],
+      "doi": "10.1145/2889488",
+      "url": "https://doi.org/10.1145/2889488",
+      "relation": "direct",
+      "summary": "研究异构统一虚拟内存机制及其开销，适合关注 CPU/XPU 地址空间与访问代价的读者。",
+      "tags": [
+        "heterogeneous systems",
+        "unified virtual memory"
+      ]
+    },
+    {
+      "id": "L15",
+      "title": "Efficient GPU Memory Management for Nonlinear DNNs",
+      "year": 2020,
+      "type": "conference paper",
+      "venue": "HPDC",
+      "authors": [
+        "Donglin Yang",
+        "Dazhao Cheng"
+      ],
+      "doi": "10.1145/3369583.3392684",
+      "url": "https://doi.org/10.1145/3369583.3392684",
+      "relation": "adjacent",
+      "summary": "优化非线性 DNN 工作负载的 GPU 内存管理，可辅助理解显存复用、峰值和分配开销。",
+      "tags": [
+        "GPU",
+        "allocator",
+        "DNN"
+      ]
+    },
+    {
+      "id": "L16",
+      "title": "GMLake: Efficient and Transparent GPU Memory Defragmentation for Large-scale DNN Training with Virtual Memory Stitching",
+      "year": 2024,
+      "type": "conference paper",
+      "venue": "ASPLOS",
+      "authors": [
+        "Cong Guo",
+        "Rui Zhang",
+        "Jiale Xu",
+        "Jingwen Leng",
+        "Zihan Liu",
+        "Ziyu Huang",
+        "Minyi Guo",
+        "Hao Wu"
+      ],
+      "doi": "10.1145/3620665.3640423",
+      "url": "https://doi.org/10.1145/3620665.3640423",
+      "relation": "direct",
+      "summary": "利用虚拟内存拼接缓解大规模 DNN 训练中的 GPU 内存碎片问题，是 XPU 显存管理与透明分配的代表工作。",
+      "tags": [
+        "GPU",
+        "memory fragmentation",
+        "virtual memory"
+      ]
+    },
+    {
+      "id": "L17",
+      "title": "Host-Based Allocators for Device Memory",
+      "year": 2024,
+      "type": "preprint",
+      "venue": "arXiv",
+      "authors": [
+        "Oren Bell",
+        "Ashwin Kumar",
+        "Chris Gill"
+      ],
+      "doi": "10.48550/arXiv.2405.07079",
+      "url": "https://arxiv.org/abs/2405.07079",
+      "relation": "direct",
+      "summary": "研究由主机端管理设备内存的分配器设计，和统一的 CPU/XPU 分配接口直接相关。预印本，需核对最新状态。",
+      "tags": [
+        "device memory",
+        "host allocator",
+        "accelerator"
+      ]
+    },
+    {
+      "id": "L18",
+      "title": "SuperNeurons: Dynamic GPU Memory Management for Training Deep Neural Networks",
+      "year": 2018,
+      "type": "preprint",
+      "venue": "arXiv",
+      "authors": [
+        "Linnan Wang",
+        "Jinmian Ye",
+        "Yiyang Zhao",
+        "Wei Wu",
+        "Ang Li",
+        "Shuaiwen Leon Song",
+        "Zenglin Xu",
+        "Tim Kraska"
+      ],
+      "doi": "10.48550/arXiv.1801.04380",
+      "url": "https://arxiv.org/abs/1801.04380",
+      "relation": "adjacent",
+      "summary": "讨论训练阶段的动态 GPU 内存管理和复用策略，可作为显存池及生命周期优化的背景。",
+      "tags": [
+        "GPU",
+        "DNN training",
+        "dynamic memory"
+      ]
+    },
+    {
+      "id": "L19",
+      "title": "Survey on Memory Management Techniques in Heterogeneous Computing Systems",
+      "year": 2019,
+      "type": "survey",
+      "venue": "IET Computers & Digital Techniques",
+      "authors": [
+        "Anakhi Hazarika",
+        "Soumyajit Poddar",
+        "Hafizur Rahaman"
+      ],
+      "doi": "10.1049/iet-cdt.2019.0092",
+      "url": "https://doi.org/10.1049/iet-cdt.2019.0092",
+      "relation": "background",
+      "summary": "异构计算内存管理综述，可用于扩展关键词、分类和早期文献。",
+      "tags": [
+        "survey",
+        "heterogeneous computing"
+      ]
+    },
+    {
+      "id": "L20",
+      "title": "A Survey of CPU-GPU Heterogeneous Computing Techniques",
+      "year": 2015,
+      "type": "survey",
+      "venue": "ACM Computing Surveys",
+      "authors": [
+        "Sparsh Mittal",
+        "Jeffrey S. Vetter"
+      ],
+      "doi": "10.1145/2788396",
+      "url": "https://doi.org/10.1145/2788396",
+      "relation": "background",
+      "summary": "CPU-GPU 异构计算综述，范围比内存管理更广，适合补充系统背景。",
+      "tags": [
+        "survey",
+        "CPU-GPU"
+      ]
+    },
+    {
+      "id": "L21",
+      "title": "StarPU: A Unified Platform for Task Scheduling on Heterogeneous Multicore Architectures",
+      "year": 2010,
+      "type": "journal article",
+      "venue": "Concurrency and Computation: Practice and Experience",
+      "authors": [
+        "Cédric Augonnet",
+        "Samuel Thibault",
+        "Raymond Namyst",
+        "Pierre-André Wacrenier"
+      ],
+      "doi": "10.1002/cpe.1631",
+      "url": "https://doi.org/10.1002/cpe.1631",
+      "relation": "adjacent",
+      "summary": "异构任务运行时，支持 CPU/GPU 上任务调度与数据管理。不是远端内存池，但可作为 CPU/XPU 生命周期和数据移动运行时的参考。",
+      "tags": [
+        "runtime",
+        "CPU-GPU",
+        "data management"
+      ]
+    },
+    {
+      "id": "L22",
+      "title": "E-WarP: A System-wide Framework for Memory Bandwidth Profiling and Management",
+      "year": 2020,
+      "type": "conference paper",
+      "venue": "RTSS",
+      "authors": [
+        "Parul Sohal",
+        "Rohan Tabish",
+        "Ulrich Drepper",
+        "Renato Mancuso"
+      ],
+      "doi": "10.1109/RTSS49844.2020.00039",
+      "url": "https://doi.org/10.1109/RTSS49844.2020.00039",
+      "relation": "adjacent",
+      "summary": "系统级内存带宽剖析和管理框架，可借鉴 CPU 与加速器共享带宽下的 QoS 观测和控制。",
+      "tags": [
+        "bandwidth",
+        "profiling",
+        "QoS"
+      ]
+    },
+    {
+      "id": "L23",
+      "title": "Profile-driven Memory Bandwidth Management for Accelerators and CPUs in QoS-enabled Platforms",
+      "year": 2022,
+      "type": "journal article",
+      "venue": "Real-Time Systems",
+      "authors": [
+        "Parul Sohal",
+        "Rohan Tabish",
+        "Ulrich Drepper",
+        "Renato Mancuso"
+      ],
+      "doi": "10.1007/s11241-022-09382-x",
+      "url": "https://doi.org/10.1007/s11241-022-09382-x",
+      "relation": "direct",
+      "summary": "直接关注 QoS 平台上 CPU 与加速器的内存带宽管理，和池化容量管理的性能隔离问题相关。",
+      "tags": [
+        "CPU-accelerator",
+        "bandwidth",
+        "QoS"
+      ]
+    },
+    {
+      "id": "L24",
+      "title": "GFlink: An In-Memory Computing Architecture on Heterogeneous CPU-GPU Clusters for Big Data",
+      "year": 2018,
+      "type": "journal article",
+      "venue": "IEEE Transactions on Parallel and Distributed Systems",
+      "authors": [
+        "Cen Chen",
+        "Kenli Li",
+        "Aijia Ouyang",
+        "Zeng Zeng",
+        "Keqin Li"
+      ],
+      "doi": "10.1109/TPDS.2018.2794343",
+      "url": "https://doi.org/10.1109/TPDS.2018.2794343",
+      "relation": "adjacent",
+      "summary": "CPU-GPU 集群上的内存计算架构，适合作为数据处理和内存驻留工作负载的系统级参考。",
+      "tags": [
+        "CPU-GPU",
+        "in-memory computing",
+        "cluster"
+      ]
+    },
+    {
+      "id": "L25",
+      "title": "TAP: A TLP-aware Cache Management Policy for a CPU-GPU Heterogeneous Architecture",
+      "year": 2012,
+      "type": "conference paper",
+      "venue": "HPCA",
+      "authors": [
+        "Jaekyu Lee",
+        "Hyesoon Kim"
+      ],
+      "doi": "10.1109/HPCA.2012.6168947",
+      "url": "https://doi.org/10.1109/HPCA.2012.6168947",
+      "relation": "background",
+      "summary": "CPU-GPU 异构架构缓存管理的早期工作，非池化内存，但可帮助理解共享内存层级和竞争。",
+      "tags": [
+        "CPU-GPU",
+        "cache",
+        "memory hierarchy"
+      ]
+    },
+    {
+      "id": "L26",
+      "title": "Devirtualizing Memory in Heterogeneous Systems",
+      "year": 2018,
+      "type": "conference/journal record",
+      "venue": "ACM SIGPLAN Notices record",
+      "authors": [
+        "Swapnil Haria",
+        "Mark D. Hill",
+        "Michael M. Swift"
+      ],
+      "doi": "10.1145/3296957.3173194",
+      "url": "https://doi.org/10.1145/3296957.3173194",
+      "relation": "adjacent",
+      "summary": "探讨异构系统中的内存虚拟化设计；可用于分析虚拟地址、物理放置与设备可见性之间的接口问题。",
+      "tags": [
+        "heterogeneous systems",
+        "virtual memory"
+      ]
+    },
+    {
+      "id": "L27",
+      "title": "Unified Virtual Memory Support for Deep CNN Accelerator on SoC FPGA",
+      "year": 2015,
+      "type": "conference paper",
+      "venue": "Lecture Notes in Computer Science",
+      "authors": [
+        "Tao Xiao",
+        "Yuran Qiao",
+        "Junzhong Shen",
+        "Qianming Yang",
+        "Mei Wen"
+      ],
+      "doi": "10.1007/978-3-319-27119-4_5",
+      "url": "https://doi.org/10.1007/978-3-319-27119-4_5",
+      "relation": "adjacent",
+      "summary": "SoC FPGA CNN 加速器的统一虚拟内存支持，属于 CPU 与专用加速器协同管理的早期案例。",
+      "tags": [
+        "FPGA",
+        "unified memory",
+        "accelerator"
+      ]
+    },
+    {
+      "id": "L28",
+      "title": "GoA: Actors with Locally Managed Memory for Go",
+      "year": 2019,
+      "type": "master thesis",
+      "venue": "University of Waterloo / UWSpace",
+      "authors": ["Daniel Caccamo"],
+      "doi": null,
+      "url": "https://hdl.handle.net/10012/14430",
+      "relation": "adjacent",
+      "summary": "研究 Go actor 的局部内存管理与回收语义，适合了解 Go 运行时和对象所有权的研究路径；不涉及 CXL 或 GPU 显存池。",
+      "tags": ["Go", "actor", "local memory management"]
+    }
+  ],
+  "tools": [
+    {
+      "name": "Linux CXL subsystem",
+      "category": "OS / CXL memory",
+      "language": "C/kernel",
+      "url": "https://docs.kernel.org/driver-api/cxl/",
+      "relation": "direct",
+      "description": "Linux CXL 驱动、设备和内存区域支持文档；用于确认 Type-3 内存设备、区域和主机端接入路径。具体能力依赖内核版本、固件和硬件。"
+    },
+    {
+      "name": "ndctl / cxl-cli",
+      "category": "CXL administration",
+      "language": "C",
+      "url": "https://github.com/pmem/ndctl",
+      "relation": "direct",
+      "description": "Linux 上管理和检查 NVDIMM/CXL 相关设备的用户态工具集合；用于枚举设备、区域和配置。按发行版、驱动与设备代际核对命令支持。"
+    },
+    {
+      "name": "Linux memory tiering / NUMA policies",
+      "category": "OS / placement",
+      "language": "Linux kernel",
+      "url": "https://docs.kernel.org/admin-guide/mm/numa_memory_policy.html",
+      "relation": "direct",
+      "description": "NUMA 内存策略与节点放置基础；可将 CXL 暴露的内存节点纳入放置、绑定和迁移实验。"
+    },
+    {
+      "name": "DAMON",
+      "category": "OS / memory telemetry",
+      "language": "Linux kernel",
+      "url": "https://docs.kernel.org/mm/damon/index.html",
+      "relation": "support",
+      "description": "Linux 数据访问监测框架，可用于分析工作集热度并探索回收、迁移与分层策略。"
+    },
+    {
+      "name": "numactl / libnuma",
+      "category": "NUMA placement",
+      "language": "C",
+      "url": "https://github.com/numactl/numactl",
+      "relation": "support",
+      "description": "查看 NUMA 拓扑并设置 CPU/内存亲和性；适合作为 DRAM 与 CXL 节点基线工具。"
+    },
+    {
+      "name": "hwloc",
+      "category": "topology discovery",
+      "language": "C",
+      "url": "https://www.open-mpi.org/projects/hwloc/",
+      "relation": "support",
+      "description": "发现 CPU、NUMA、PCIe 与设备拓扑，为内存池和 XPU 放置策略提供拓扑输入。"
+    },
+    {
+      "name": "DRackSim",
+      "category": "CXL simulator",
+      "language": "research simulator",
+      "url": "https://doi.org/10.1145/3615979.3656059",
+      "relation": "direct",
+      "description": "CXL 大规模分解式内存系统模拟研究；建议先确认代码是否公开及其模型假设，再用于复现实验。"
+    },
+    {
+      "name": "Umpire",
+      "category": "heterogeneous allocator",
+      "language": "C++",
+      "url": "https://github.com/LLNL/Umpire",
+      "docs": "https://umpire.readthedocs.io/en/develop/",
+      "relation": "direct",
+      "description": "LLNL 的多资源内存管理器，面向 NUMA 和 GPU 资源，可提供 allocator/resource 组合和策略。适合做 CPU/XPU 分配管理原型。"
+    },
+    {
+      "name": "RAPIDS RMM",
+      "category": "GPU allocator",
+      "language": "C++ / Python",
+      "url": "https://github.com/rapidsai/rmm",
+      "docs": "https://docs.nvidia.com/rmm/latest/",
+      "relation": "direct",
+      "description": "NVIDIA GPU 内存分配与资源管理库，提供设备内存资源和池化分配能力；主要面向 CUDA，不是 CXL 主机内存池管理器。"
+    },
+    {
+      "name": "CUDA memory pools / cudaMallocAsync",
+      "category": "GPU allocator API",
+      "language": "CUDA C++",
+      "url": "https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/stream-ordered-memory-allocation.html",
+      "relation": "direct",
+      "description": "CUDA stream-ordered 分配和 memory pool API，可管理设备内存复用及访问属性；适用于 CUDA 设备侧显存池。"
+    },
+    {
+      "name": "CUDA Unified Memory",
+      "category": "CPU-GPU memory",
+      "language": "CUDA C++",
+      "url": "https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/unified-memory.html",
+      "relation": "direct",
+      "description": "CUDA managed memory 与迁移/预取机制，用于 CPU-GPU 共享虚拟地址空间工作负载；它不等同于 CXL 共享内存池。"
+    },
+    {
+      "name": "HIP memory management / memory pools",
+      "category": "GPU allocator API",
+      "language": "HIP C++",
+      "url": "https://rocm.docs.amd.com/projects/HIP/en/latest/how-to/hip_runtime_api/memory_management.html",
+      "relation": "direct",
+      "description": "AMD ROCm/HIP 的设备内存分配与内存池接口，便于构建 AMD GPU 侧分配器。"
+    },
+    {
+      "name": "SYCL Unified Shared Memory (USM)",
+      "category": "CPU-XPU memory API",
+      "language": "C++ / SYCL",
+      "url": "https://registry.khronos.org/SYCL/specs/sycl-2020/html/sycl-2020.html",
+      "relation": "direct",
+      "description": "SYCL 的 host/device/shared allocation 模型，提供异构共享或显式设备分配接口。不同设备对 shared USM 的支持和性能有差异。"
+    },
+    {
+      "name": "StarPU",
+      "category": "heterogeneous runtime",
+      "language": "C",
+      "url": "https://starpu.gitlabpages.inria.fr/",
+      "relation": "direct",
+      "description": "CPU/GPU 等异构设备任务调度与数据管理运行时，适合作为数据生命周期、传输和异构任务协同的参考。"
+    },
+    {
+      "name": "Kokkos",
+      "category": "heterogeneous programming / memory spaces",
+      "language": "C++",
+      "url": "https://github.com/kokkos/kokkos",
+      "relation": "support",
+      "description": "性能可移植编程模型，提供多种执行空间和内存空间抽象；适合验证应用层 CPU/XPU 数据结构与分配方式。"
+    },
+    {
+      "name": "Vulkan Memory Allocator (VMA)",
+      "category": "GPU allocator",
+      "language": "C++",
+      "url": "https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator",
+      "relation": "adjacent",
+      "description": "Vulkan GPU 显存分配库，支持子分配和预算查询；其“memory pool”主要是 Vulkan device memory 子分配，不是 CPU 可共享池。"
+    },
+    {
+      "name": "Apache Arrow MemoryPool",
+      "category": "host allocator / analytics",
+      "language": "C++ (多语言绑定)",
+      "url": "https://arrow.apache.org/docs/cpp/memory.html",
+      "relation": "adjacent",
+      "description": "Arrow 的主机端缓冲区分配抽象，适合列式数据的 CPU 端内存管理；默认并不管理 GPU 或 CXL 设备。"
+    },
+    {
+      "name": "jemalloc",
+      "category": "host allocator baseline",
+      "language": "C",
+      "url": "https://github.com/jemalloc/jemalloc",
+      "relation": "support",
+      "description": "通用主机内存分配器，可作为 CPU 主机分配与碎片行为基线；不是 XPU/CXL 池管理器。"
+    },
+    {
+      "name": "mimalloc",
+      "category": "host allocator baseline",
+      "language": "C",
+      "url": "https://github.com/microsoft/mimalloc",
+      "relation": "support",
+      "description": "通用高性能主机分配器，适合作为 CPU 堆分配器对照组。"
+    },
+    {
+      "name": "Go sync.Pool",
+      "category": "Go host object reuse",
+      "language": "Go standard library",
+      "url": "https://pkg.go.dev/sync#Pool",
+      "relation": "support",
+      "description": "降低短生命周期临时对象分配压力的标准库对象复用设施；GC 可清空内容，不能用于要求确定性生命周期的 GPU/CXL 资源池。"
+    },
+    {
+      "name": "Go runtime/debug.SetMemoryLimit",
+      "category": "Go runtime control",
+      "language": "Go standard library",
+      "url": "https://pkg.go.dev/runtime/debug#SetMemoryLimit",
+      "relation": "support",
+      "description": "设置 Go runtime 的软内存目标以影响 GC 行为；不是硬上限，也不直接限制 C 分配、GPU 显存或 CXL 设备内存。"
+    },
+    {
+      "name": "Go cgo",
+      "category": "Go native interop",
+      "language": "Go / C",
+      "url": "https://pkg.go.dev/cmd/cgo",
+      "relation": "support",
+      "description": "连接 Go 控制面与 CUDA/HIP/oneAPI、Umpire、RMM 等原生数据面的一种入口。需明确释放责任、异步操作生命周期及 cgo 指针规则。"
+    },
+    {
+      "name": "Go runtime.Pinner",
+      "category": "Go native interop",
+      "language": "Go standard library",
+      "url": "https://pkg.go.dev/runtime#Pinner",
+      "relation": "support",
+      "description": "在受支持的 cgo 场景中固定 Go 对象的 GC 地址；不提供 OS 页锁定或 DMA 所需的 pinned host allocation。"
+    },
+    {
+      "name": "Go bytebufferpool",
+      "category": "Go host buffer pool",
+      "language": "Go",
+      "url": "https://github.com/valyala/bytebufferpool",
+      "relation": "support",
+      "description": "复用 Go 字节缓冲区，适合网络和临时 CPU buffer；不提供 pinned host memory 或设备分配。"
+    },
+    {
+      "name": "libp2p go-buffer-pool",
+      "category": "Go host buffer pool",
+      "language": "Go",
+      "url": "https://github.com/libp2p/go-buffer-pool",
+      "relation": "support",
+      "description": "轻量 Go 字节切片复用工具；只解决进程内 host buffer 分配。"
+    },
+    {
+      "name": "gobwas/pool",
+      "category": "Go object/buffer pool",
+      "language": "Go",
+      "url": "https://github.com/gobwas/pool",
+      "relation": "support",
+      "description": "Go pool helper，适合作为 host 对象/缓冲区复用组件。"
+    },
+    {
+      "name": "go-commons-pool",
+      "category": "Go generic resource pool",
+      "language": "Go",
+      "url": "https://github.com/jolestar/go-commons-pool",
+      "relation": "support",
+      "description": "通用对象资源池，提供池化生命周期管理思路；资源是否可复用及何时释放仍需应用层实现。"
+    },
+    {
+      "name": "Gorgonia",
+      "category": "Go ML framework",
+      "language": "Go",
+      "url": "https://github.com/gorgonia/gorgonia",
+      "relation": "adjacent",
+      "description": "Go 语言机器学习/计算图生态，可作为 Go 侧 XPU 工作负载入口；后端兼容性、设备支持和维护状态应按具体版本验证。"
+    },
+    {
+      "name": "gorgonia/cu",
+      "category": "Go CUDA bindings",
+      "language": "Go / cgo / CUDA",
+      "url": "https://github.com/gorgonia/cu",
+      "relation": "adjacent",
+      "description": "Gorgonia 生态的 CUDA 互操作项目；可供 Go 原型连接原生 CUDA，但不属于通用显存池管理器。"
+    },
+    {
+      "name": "gorgonia/tensor",
+      "category": "Go tensor library",
+      "language": "Go",
+      "url": "https://github.com/gorgonia/tensor",
+      "relation": "adjacent",
+      "description": "Go 张量数据结构项目，面向应用层数据表示；需要另接可用的设备后端和显式设备内存管理。"
+    },
+    {
+      "name": "go-opencl",
+      "category": "Go XPU bindings",
+      "language": "Go / cgo / OpenCL",
+      "url": "https://github.com/jgillich/go-opencl",
+      "relation": "adjacent",
+      "description": "OpenCL Go bindings，可作为跨厂商设备接口原型入口；发布版本、系统 OpenCL runtime 与硬件兼容性需确认。"
+    },
+    {
+      "name": "onnxruntime_go",
+      "category": "Go inference binding",
+      "language": "Go / cgo / ONNX Runtime",
+      "url": "https://github.com/yalue/onnxruntime_go",
+      "relation": "adjacent",
+      "description": "Go 对 ONNX Runtime 的封装；能否使用 CUDA/其他加速执行提供程序取决于所链接的 ONNX Runtime 构建，不负责池化内存策略。"
+    },
+    {
+      "name": "Hugot",
+      "category": "Go inference framework",
+      "language": "Go",
+      "url": "https://github.com/knights-analytics/hugot",
+      "relation": "adjacent",
+      "description": "Go 中的 ONNX transformer pipeline 项目；可作为推理控制面/应用层，不应视为底层 XPU allocator。"
+    },
+    {
+      "name": "MuMax3",
+      "category": "Go XPU application",
+      "language": "Go / CUDA",
+      "url": "https://github.com/mumax/3",
+      "relation": "adjacent",
+      "description": "Go 编写的 GPU 加速微磁模拟软件，展示 Go 应用与 GPU 后端结合的成熟案例；目标是科学计算，不是通用内存池。"
+    },
+    {
+      "name": "NVIDIA go-nvml",
+      "category": "Go device telemetry",
+      "language": "Go bindings / NVML",
+      "url": "https://github.com/NVIDIA/go-nvml",
+      "relation": "support",
+      "description": "Go 绑定 NVIDIA 管理库，可用于设备发现和遥测/控制面；不是显存 allocator。"
+    },
+    {
+      "name": "NVIDIA Kubernetes device plugin",
+      "category": "Go device orchestration",
+      "language": "Go",
+      "url": "https://github.com/NVIDIA/k8s-device-plugin",
+      "relation": "support",
+      "description": "Kubernetes 中暴露和分配 GPU 设备资源；粒度主要是设备及资源声明，不负责在应用间池化显存。"
+    },
+    {
+      "name": "AMD ROCm Kubernetes device plugin",
+      "category": "Go device orchestration",
+      "language": "Go",
+      "url": "https://github.com/ROCm/k8s-device-plugin",
+      "relation": "support",
+      "description": "Kubernetes 对 ROCm GPU 的设备资源发现与暴露；不等于 GPU 内存或 CXL 内存池。"
+    },
+    {
+      "name": "Intel device plugins for Kubernetes",
+      "category": "Go device orchestration",
+      "language": "Go",
+      "url": "https://github.com/intel/intel-device-plugins-for-kubernetes",
+      "relation": "support",
+      "description": "Kubernetes 上 Intel 加速器等设备插件集合，可支持 XPU 资源发现和调度集成；内存策略仍需另外实现。"
+    }
+  ],
+  "research_groups": [
+    {
+      "name": "UC San Diego — Storage Systems / SysNet 相关团队",
+      "institution": "University of California San Diego",
+      "focus": "分解式/远端内存系统、存储系统与系统软件协同。",
+      "evidence": "Clio: A Hardware-Software Co-Designed Disaggregated Memory System (ASPLOS 2022) 作者单位包含 UC San Diego。",
+      "url": "https://cseweb.ucsd.edu/~yiying/",
+      "related_work": ["L08"],
+      "relevance": "direct",
+      "note": "以论文作者及公开个人/团队页面为线索；具体课题组名称和成员会随时间调整。"
+    },
+    {
+      "name": "University of Michigan — Systems Lab / Mosharaf Chowdhury 团队",
+      "institution": "University of Michigan",
+      "focus": "云与集群系统、内存分层、CXL tiering 和数据中心资源管理。",
+      "evidence": "TPP: Transparent Page Placement for CXL-Enabled Tiered-Memory (ASPLOS 2023) 作者包含 Michigan 团队成员。",
+      "url": "https://systems.engin.umich.edu/",
+      "related_work": ["L07"],
+      "relevance": "direct",
+      "note": "官方页面可能对自动化访问有限；论文 DOI 是可验证的研究线索。"
+    },
+    {
+      "name": "KAIST — 内存系统与架构研究团队",
+      "institution": "Korea Advanced Institute of Science and Technology",
+      "focus": "CXL 内存池、内存系统和存储/内存架构。",
+      "evidence": "Memory Pooling With CXL (IEEE Micro 2023) 作者单位记录包含 KAIST。",
+      "url": "https://cs.kaist.ac.kr/",
+      "related_work": [
+        "L02"
+      ],
+      "relevance": "direct",
+      "note": "这里按论文单位归纳研究团队方向，不将单篇论文误称为固定的实验室名称。"
+    },
+    {
+      "name": "上海交通大学 / 上海期智研究院 GMLake 作者团队",
+      "institution": "Shanghai Jiao Tong University / Shanghai Qi Zhi Institute",
+      "focus": "GPU 内存管理、虚拟内存拼接和显存碎片管理。",
+      "evidence": "GMLake (ASPLOS 2024) 作者来自上海交通大学及上海期智研究院。",
+      "url": "https://doi.org/10.1145/3620665.3640423",
+      "related_work": [
+        "L16"
+      ],
+      "relevance": "direct",
+      "note": "按论文作者单位归纳，未将作者团队直接归属到某个特定实验室。"
+    },
+    {
+      "name": "ETH Zürich — SAFARI Research Group",
+      "institution": "ETH Zürich",
+      "focus": "内存系统、内存层次、数据移动和高性能计算架构；与池化/分层内存问题邻近。",
+      "evidence": "公开研究方向覆盖 memory systems；本次清单未将其归为某一 CXL pooling 核心论文的唯一来源。",
+      "url": "https://safari.ethz.ch/",
+      "related_work": [],
+      "relevance": "adjacent",
+      "note": "作为内存系统方向的相关研究组推荐，读者应从当前主页确认在研项目。"
+    },
+    {
+      "name": "Inria Bordeaux / StarPU 项目团队",
+      "institution": "Inria and University of Bordeaux",
+      "focus": "异构 CPU/GPU 运行时、任务调度和数据管理。",
+      "evidence": "StarPU 论文及官方项目主页；与设备间数据生命周期管理直接相关。",
+      "url": "https://starpu.gitlabpages.inria.fr/",
+      "related_work": [
+        "L21"
+      ],
+      "relevance": "adjacent",
+      "note": "更偏异构运行时与数据移动，不是 CXL 内存池研究组。"
+    },
+    {
+      "name": "Lawrence Livermore National Laboratory — Umpire 团队",
+      "institution": "Lawrence Livermore National Laboratory",
+      "focus": "面向 HPC 的 NUMA/GPU 内存资源和分配器管理。",
+      "evidence": "Umpire 官方项目说明称其用于 NUMA 与 GPU 架构的内存管理。",
+      "url": "https://computing.llnl.gov/projects/umpire",
+      "related_work": [],
+      "relevance": "direct",
+      "note": "以开源软件团队和应用研发团队为主，适合工具协作与原型参考。"
+    },
+    {
+      "name": "Microsoft / Azure 云系统研究与工程团队",
+      "institution": "Microsoft Research and Azure",
+      "focus": "云平台、资源池化和 CXL-based memory pooling。",
+      "evidence": "Pond: CXL-Based Memory Pooling Systems for Cloud Platforms (ASPLOS 2023) 包含 Microsoft 与云平台作者。",
+      "url": "https://www.microsoft.com/en-us/research/publication/pond-cxl-based-memory-pooling-systems-for-cloud-platforms/",
+      "related_work": [
+        "L01"
+      ],
+      "relevance": "direct",
+      "note": "按公开论文作者单位归纳，不代表当前组织编制或团队名称。"
+    },
+    {
+      "name": "Ghent University — DyNaMat / MuMax3 团队",
+      "institution": "Ghent University",
+      "focus": "Go 与 CUDA 结合的 GPU 科学计算软件，涉及设备侧数据生命周期和 CPU-GPU 协同。",
+      "evidence": "MuMax3 项目主页明确写明由 Ghent University 的 DyNaMat 团队开发维护；项目源码构建依赖 Go 与 CUDA。",
+      "url": "https://www.ugent.be/we/solidstatesciences/dynamat/en",
+      "related_work": [],
+      "relevance": "adjacent",
+      "note": "是 Go+GPU 应用研究组，不是 CXL 池化内存或通用显存分配器研究组。"
+    },
+    {
+      "name": "University of Waterloo — GoA 研究线索",
+      "institution": "University of Waterloo",
+      "focus": "Go actor 的局部内存管理与对象所有权。",
+      "evidence": "2019 年学位论文 GoA: Actors with Locally Managed Memory for Go 收录于 UWSpace。",
+      "url": "https://hdl.handle.net/10012/14430",
+      "related_work": ["L28"],
+      "relevance": "adjacent",
+      "note": "仅能确认论文及机构，不能据此认定存在仍在运行的同名专门课题组。"
+    }
+  ],
+  "go_ecosystem": {
+    "assessment": "本次定向检索未找到成熟的 Go 专用 CXL memory-pooling + CPU/XPU 统一管理研究组或通用底层 allocator。Go 的优势目前更像控制面、服务编排和应用接入；底层 pinned/device memory 分配通常由 Linux、CUDA/HIP/SYCL、C/C++ runtime 负责。",
+    "most_relevant_projects": [
+      "Gorgonia",
+      "gorgonia/cu",
+      "go-opencl",
+      "onnxruntime_go",
+      "MuMax3",
+      "NVIDIA go-nvml",
+      "NVIDIA Kubernetes device plugin",
+      "AMD ROCm Kubernetes device plugin"
+    ],
+    "practical_notes": [
+      "Go sync.Pool 管理的是可丢弃的临时 Go 对象；它不保证资源保留，也没有设备分配、页锁定或 CXL NUMA placement 语义。",
+      "Go runtime/debug.SetMemoryLimit 主要调节 Go runtime 的软内存目标；cgo 分配、GPU 显存和设备内存池需单独记账。",
+      "runtime.Pinner 用于固定 Go 对象以满足特定 cgo 指针生命周期要求，不等价于操作系统 mlock，也不等价于 CUDA/HIP pinned host allocation。",
+      "可行原型常采用 Go 控制面 + 原生 C/C++ 数据面：Go 管理配额、队列、设备遥测和策略；原生 runtime 执行 GPU/CXL 分配与迁移。需要明确所有权、异步完成前的生命周期和释放路径。"
+    ]
+  },
+  "research_directions": [
+    "测量 CPU DRAM、CXL 内存、GPU HBM/显存及 GPU 可访问 host memory 的延迟/带宽差异；区分本地访问、DMA、页迁移和远端访问。",
+    "设计跨层配额与 placement 策略：在 CPU 热页、GPU 工作集、CXL 容量之间结合访问热度、QoS、容量压力和迁移开销。",
+    "评估 fragmentation、异步分配、跨进程隔离、公平性和尾延迟；不要只报告平均吞吐或池容量利用率。",
+    "在 Go 原型中先把设备内存/池资源建模为显式句柄和确定性 Close/Release 生命周期，再接入 cgo 原生 allocator；避免把 GPU 资源放进可被 GC 丢弃的 sync.Pool。",
+    "做端到端对照：原生 C++ runtime、Go 控制面+cgo 数据面、纯 host object pool；覆盖分配吞吐、CPU 开销、XPU 利用率、迁移字节数、故障/回收和多租户 QoS。"
+  ],
+  "recommended_reading_order": [
+    "L02",
+    "L01",
+    "L03",
+    "L07",
+    "L08",
+    "L12",
+    "L16",
+    "L17",
+    "L21",
+    "L23"
+  ]
+}
