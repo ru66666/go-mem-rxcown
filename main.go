@@ -26,13 +26,13 @@ func main() {
 	stopCh := make(chan struct{})
 	go startGCHookMonitor(time.Second, stopCh)
 
-	// GC 触发采样：标记 reason=gc
+	// GC 触发采样：每次 GC 后打印聚合版，标记 reason=gc
 	registerGCCallback(func(_ *debug.GCStats) {
-		pool.DumpAllPoolsGCStatsWithReason("", "gc") // 空串 = 遍历全部 pool
+		pool.DumpAllPoolsGCStatsAggWithReason("", "gc") // 空串 = 遍历全部 pool
 	})
 
-	// 定时采样：每 5s 一次，标记 reason=tick，覆盖 GC 触发点之间的中间状态
-	pool.StartPoolStatsTicker(5*time.Second, "", "tick", stopCh)
+	// 定时采样：每 5 分钟一次完整版（聚合段在开头 + 逐 pool 明细，整体单次写出），标记 reason=tick
+	pool.StartPoolStatsTickerMode(5*time.Minute, "", "tick", stopCh, pool.DumpModeFull)
 	// ===== 新增结束 =====
 
 	configPath := env.GetCfgjsnNameFromEnv2()

@@ -14,15 +14,15 @@ import (
 )
 
 /*
-span memory format:
-| 1 byte | 1 byte | 2 bytes | 4 bytes | 4 bytes | data len | 4 bytes |
-| arena idx | object idx | data len | span idx | header magic | data | tail magic |
+   span memory format:
+   |  1 byte   |   1 byte   |  2 bytes  |  4 bytes  |   4 bytes    |  data len  |  4 bytes   |
+   | arena idx | object idx |  data len | span idx  | header magic |    data    | tail magic |
 */
 
 /*
-out of bounds arena memory format:
-| 1 byte | 3 bytes | 4 bytes | 4 bytes | data len | 4 bytes |
-| arena idx | 0 | object idx | header magic | data | tail magic |
+   out of bounds arena memory format:
+   |  1 byte   | 3 bytes |   4 bytes   |   4 bytes    |  data len  |  4 bytes   |
+   | arena idx |    0    | object idx  | header magic |    data    | tail magic |
 */
 
 const (
@@ -87,52 +87,13 @@ type MPool interface {
 	Dx() string
 }
 
-// span stats interface
-type SpanStats interface {
-	Idx() uint32
-	ObjectNum() uint8
-	SpanSize() uint8
-	ObjAllocNum() uint64
-	ObjFreeNum() uint64
-}
-
-// span stats struct
-type spanStats struct {
-	idx         uint32
-	objectNum   uint8
-	spanSize    uint8
-	objAllocNum uint64
-	objFreeNum  uint64
-}
-
-// arenaOB stats interface
-type ArenaOBStats interface {
-	PoolName() string
-	InUsed() int64
-	ObjAllocNum() uint64
-	ObjFreeNum() uint64
-	ObjFreedBytes() uint64
-	ObjectsCap() uint64
-	IdxPoolCap() uint64
-}
-
-type arenaOBStats struct {
-	poolName      string
-	inUsed        int64
-	objAllocNum   uint64
-	objFreeNum    uint64
-	objFreedBytes uint64
-	objectsCap    uint64
-	idxPoolCap    uint64
-}
-
 // arena stats interface
 type ArenaStats interface {
 	PoolName() string
 	ObjectSize() uint32
 	SpanSize() uint8
 	SpanNum() uint32
-	Usage() int // 0-100 arena usage means percentage of memory objects in use
+	Usage() int // 0-100  arena usage means percentage of memory objects in use
 	SpanAllocNum() uint64
 	SpanFreedNum() uint64
 	SpanFreedBytes() uint64
@@ -156,367 +117,102 @@ type arenaStats struct {
 }
 
 /*
-@title
-Idx
-@description
-Get span index of span stats
-@PARAM
-@return
-uint32: Span index of span stats
-@note
-*/
-func (s *spanStats) Idx() uint32 {
-	return s.idx
-}
-
-/*
-@title
-ObjectNum
-@description
-Get object num of span stats
-@PARAM
-@return
-uint8: Object num of span stats
-@note
-*/
-func (s *spanStats) ObjectNum() uint8 {
-	return s.objectNum
-}
-
-/*
-@title
-SpanSize
-@description
-Get span size of span stats
-@PARAM
-@return
-uint8: Span size of span stats
-@note
-*/
-func (s *spanStats) SpanSize() uint8 {
-	return s.spanSize
-}
-
-/*
-@title
-ObjAllocNum
-@description
-Get accumulated malloc object num of span stats
-@PARAM
-@return
-uint64: Accumulated malloc object num of span stats
-@note
-*/
-func (s *spanStats) ObjAllocNum() uint64 {
-	return s.objAllocNum
-}
-
-/*
-@title
-ObjFreeNum
-@description
-Get accumulated free object num of span stats
-@PARAM
-@return
-uint64: Accumulated free object num of span stats
-@note
-*/
-func (s *spanStats) ObjFreeNum() uint64 {
-	return s.objFreeNum
-}
-
-/*
-@title
-PoolName
-@description
-Get pool name of arenaOB stats
-@PARAM
-@return
-string: Pool name of arenaOB stats
-@note
-*/
-func (o *arenaOBStats) PoolName() string {
-	return o.poolName
-}
-
-/*
-@title
-InUsed
-@description
-Get inuse object num of arenaOB stats
-@PARAM
-@return
-int64: Inuse object num of arenaOB stats
-@note
-*/
-func (o *arenaOBStats) InUsed() int64 {
-	return o.inUsed
-}
-
-/*
-@title
-ObjAllocNum
-@description
-Get accumulated malloc object num of arenaOB stats
-@PARAM
-@return
-uint64: Accumulated malloc object num of arenaOB stats
-@note
-*/
-func (o *arenaOBStats) ObjAllocNum() uint64 {
-	return o.objAllocNum
-}
-
-/*
-@title
-ObjFreeNum
-@description
-Get accumulated free object num of arenaOB stats
-@PARAM
-@return
-uint64: Accumulated free object num of arenaOB stats
-@note
-*/
-func (o *arenaOBStats) ObjFreeNum() uint64 {
-	return o.objFreeNum
-}
-
-/*
-@title
-ObjFreedBytes
-@description
-Get accumulated freed bytes of arenaOB stats
-@PARAM
-@return
-uint64: Accumulated freed bytes of arenaOB stats
-@note
-*/
-func (o *arenaOBStats) ObjFreedBytes() uint64 {
-	return o.objFreedBytes
-}
-
-/*
-@title
-ObjectsCap
-@description
-Get objects array peak capacity of arenaOB stats
-@PARAM
-@return
-uint64: Objects array peak capacity of arenaOB stats
-@note
-*/
-func (o *arenaOBStats) ObjectsCap() uint64 {
-	return o.objectsCap
-}
-
-/*
-@title
-IdxPoolCap
-@description
-Get idxPool array peak capacity of arenaOB stats
-@PARAM
-@return
-uint64: IdxPool array peak capacity of arenaOB stats
-@note
-*/
-func (o *arenaOBStats) IdxPoolCap() uint64 {
-	return o.idxPoolCap
-}
-
-/*
-@title
-PoolName
-@description
-Get pool name of arena stats
-@PARAM
-@return
-string: Pool name of arena stats
-@note
-*/
+ * @title
+ *	PoolName
+ * @description
+ *	Get pool name of arena stats
+ * @param
+ *
+ * @return
+ *	string: Pool name of arena stats
+ * @note
+ */
 func (a *arenaStats) PoolName() string {
 	return a.poolName
 }
 
 /*
-@title
-ObjectSize
-@description
-Get object size of arena stats
-@PARAM
-@return
-uint32: Object size of arena stats
-@note
-*/
+ * @title
+ *	ObjectSize
+ * @description
+ *	Get object size of arena stats
+ * @param
+ *
+ * @return
+ *	uint32: Object size of arena stats
+ * @note
+ */
 func (a *arenaStats) ObjectSize() uint32 {
 	return a.objectSize
 }
 
 /*
-@title
-SpanSize
-@description
-Get span size of arena stats
-@PARAM
-@return
-uint8: Span size of arena stats
-@note
-*/
+ * @title
+ *	SpanSize
+ * @description
+ *	Get span size of arena stats
+ * @param
+ *
+ * @return
+ *	uint8: Span size of arena stats
+ * @note
+ */
 func (a *arenaStats) SpanSize() uint8 {
 	return a.spanSize
 }
 
 /*
-@title
-SpanNum
-@description
-Get span num of arena stats
-@PARAM
-@return
-uint32: Span num of arena stats
-@note
-*/
+ * @title
+ *	SpanNum
+ * @description
+ *	Get span num of arena stats
+ * @param
+ *
+ * @return
+ *	uint32: Span num of arena stats
+ * @note
+ */
 func (a *arenaStats) SpanNum() uint32 {
 	return a.spanNum
 }
 
 /*
-@title
-Usage
-@description
-Get usage of arena stats
-@PARAM
-@return
-int: Usage of arena stats
-@note
-*/
+ * @title
+ *	Usage
+ * @description
+ *	Get usage of arena stats
+ * @param
+ *
+ * @return
+ *	int: Usage of arena stats
+ * @note
+ */
 func (a *arenaStats) Usage() int {
 	return a.usage
 }
 
 /*
-@title
-SpanAllocNum
-@description
-Get accumulated allocated span num of arena stats
-@PARAM
-@return
-uint64: Accumulated allocated span num of arena stats
-@note
-*/
-func (a *arenaStats) SpanAllocNum() uint64 {
-	return a.spanAllocNum
-}
-
-/*
-@title
-SpanFreedNum
-@description
-Get accumulated freed span num of arena stats
-@PARAM
-@return
-uint64: Accumulated freed span num of arena stats
-@note
-*/
-func (a *arenaStats) SpanFreedNum() uint64 {
-	return a.spanFreedNum
-}
-
-/*
-@title
-SpanFreedBytes
-@description
-Get accumulated freed span bytes of arena stats
-@PARAM
-@return
-uint64: Accumulated freed span bytes of arena stats
-@note
-*/
-func (a *arenaStats) SpanFreedBytes() uint64 {
-	return a.spanFreedBytes
-}
-
-/*
-@title
-SpanFreedObjs
-@description
-Get accumulated freed span object num of arena stats
-@PARAM
-@return
-uint64: Accumulated freed span object num of arena stats
-@note
-*/
-func (a *arenaStats) SpanFreedObjs() uint64 {
-	return a.spanFreedObjs
-}
-
-/*
-@title
-ObjRetainNum
-@description
-Get accumulated freed-but-retained object num of arena stats
-@PARAM
-@return
-uint64: Accumulated freed-but-retained object num of arena stats
-@note
-*/
-func (a *arenaStats) ObjRetainNum() uint64 {
-	return a.objRetainNum
-}
-
-/*
-@title
-ActiveSpans
-@description
-Get active span stats list of arena stats
-@PARAM
-@return
-[]SpanStats: Active span stats list of arena stats
-@note
-*/
-func (a *arenaStats) ActiveSpans() []SpanStats {
-	return a.activeSpans
-}
-
-/*
-@title
-
-newArenaStats
-
-@description
-
-# Create new ArenaStats instance
-
-@PARAM
-
-poolName string: Pool name
-
-objectSize uint32: Object size
-
-spanNum uint32: Span num
-
-spanSize uint8: Span size
-
-inUseNum int64: Inuse num
-
-@return
-
-ArenaStats: ArenaStats instance
-
-@note
-*/
-func newArenaStats(poolName string, objectSize, spanNum uint32, spanSize uint8, inUseNum int64,
-	spanAllocNum, spanFreedNum, spanFreedBytes, spanFreedObjs, objRetainNum uint64, activeSpans []SpanStats) ArenaStats {
+ * @title
+ *	newArenaStats
+ * @description
+ *	Create new ArenaStats instance
+ * @param
+ *  poolName string: Pool name
+ *  objectSize uint32: Object size
+ *  spanNum uint32: Span num
+ *  spanSize uint8: Span size
+ *  inUseNum int64: Inuse num
+ *
+ * @return
+ *	ArenaStats: ArenaStats instance
+ * @note
+ */
+func newArenaStats(poolName string, objectSize, spanNum uint32, spanSize uint8, inUseNum int64) ArenaStats {
 	state := &arenaStats{
-		poolName:       poolName,
-		objectSize:     objectSize,
-		spanSize:       spanSize,
-		spanNum:        spanNum,
-		spanAllocNum:   spanAllocNum,
-		spanFreedNum:   spanFreedNum,
-		spanFreedBytes: spanFreedBytes,
-		spanFreedObjs:  spanFreedObjs,
-		objRetainNum:   objRetainNum,
-		activeSpans:    activeSpans,
+		poolName:   poolName,
+		objectSize: objectSize,
+		spanSize:   spanSize,
+		spanNum:    spanNum,
 	}
 
 	if spanNum == 0 {
@@ -527,36 +223,6 @@ func newArenaStats(poolName string, objectSize, spanNum uint32, spanSize uint8, 
 	}
 
 	return state
-}
-
-/*
-@title
-newArenaOBStats
-@description
-Create new ArenaOBStats instance
-@PARAM
-poolName string: Pool name
-inUsed int64: Inuse object num
-objAllocNum uint64: Accumulated malloc object num
-objFreeNum uint64: Accumulated free object num
-objFreedBytes uint64: Accumulated freed bytes
-objectsCap uint64: Objects array peak capacity
-idxPoolCap uint64: IdxPool array peak capacity
-@return
-ArenaOBStats: ArenaOBStats instance
-@note
-*/
-func newArenaOBStats(poolName string, inUsed int64,
-	objAllocNum, objFreeNum, objFreedBytes, objectsCap, idxPoolCap uint64) ArenaOBStats {
-	return &arenaOBStats{
-		poolName:      poolName,
-		inUsed:        inUsed,
-		objAllocNum:   objAllocNum,
-		objFreeNum:    objFreeNum,
-		objFreedBytes: objFreedBytes,
-		objectsCap:    objectsCap,
-		idxPoolCap:    idxPoolCap,
-	}
 }
 
 type span struct {
@@ -573,23 +239,23 @@ type span struct {
 }
 
 /*
-@title
-initSpan
-@description
-Initialize span instance
-@PARAM
-idx uint32: Span index
-spanSize uint8: Span size
-objectSize uint32: Object size
-@return
-@note
-*/
+ * @title
+ *	initSpan
+ * @description
+ *	Initialize span instance
+ * @param
+ *  idx uint32: Span index
+ *  spanSize uint8: Span size
+ *  objectSize uint32: Object size
+ *
+ * @return
+ * @note
+ */
 func (s *span) initSpan(idx uint32, spanSize uint8, objectSize uint32) {
 	s.idx = idx
 	s.spanSize = spanSize
 	s.objectSize = objectSize
-	s.objAllocNum = 0
-	s.objFreeNum = 0
+	s4SpanInit(s)
 	memSize := (objectSize + reservedLen) * uint32(spanSize)
 	if memSize > math.MaxInt32 {
 		dlog.DebugEF(nil, "mem size %d out of range", memSize)
@@ -608,22 +274,16 @@ func (s *span) initSpan(idx uint32, spanSize uint8, objectSize uint32) {
 }
 
 /*
-@title
-
-getObjectIdx
-
-@description
-
-# Get available object index in span
-
-@PARAM
-
-@return
-
-uint8: Available object index in span
-
-@note
-*/
+ * @title
+ *	getObjectIdx
+ * @description
+ *	Get available object index in span
+ * @param
+ *
+ * @return
+ *	uint8: Available object index in span
+ * @note
+ */
 func (s *span) getObjectIdx() uint8 {
 	offset := s.spanSize - s.objectNum - 1
 	idx := s.objects[offset]
@@ -633,212 +293,201 @@ func (s *span) getObjectIdx() uint8 {
 }
 
 /*
-@title
-getObjectIdxByPtr
-@description
-Get object index from memory address
-@PARAM
-ptr uintptr: Memory block address
-@return
-uint8: Object index
-@note
-*/
+ * @title
+ *	getObjectIdxByPtr
+ * @description
+ *	Get object index from memory address
+ * @param
+ *  ptr uintptr: Memory block address
+ *
+ * @return
+ *	uint8: Object index
+ * @note
+ */
 func getObjectIdxByPtr(ptr uintptr) uint8 {
 	return *(*uint8)(unsafe.Pointer(ptr + objectIdxOffset))
 }
 
 /*
-@title
-setPtrObjectIdx
-@description
-Set object index to memory block header
-@PARAM
-ptr uintptr: Memory block address
-idx uint8: Object index
-@return
-@note
-*/
+ * @title
+ *	setPtrObjectIdx
+ * @description
+ *	Set object index to memory block header
+ * @param
+ *  ptr uintptr: Memory block address
+ *  idx uint8: Object index
+ *
+ * @return
+ * @note
+ */
 func setPtrObjectIdx(ptr uintptr, idx uint8) {
 	*(*uint8)(unsafe.Pointer(ptr + objectIdxOffset)) = idx
 }
 
 /*
-@title
-setMagic
-@description
-Set object magic number
-@PARAM
-ptr uintptr: Memory block address
-@return
-@note
-*/
+ * @title
+ *	setMagic
+ * @description
+ *	Set object magic number
+ * @param
+ *  ptr uintptr: Memory block address
+ *
+ * @return
+ * @note
+ */
 func setMagic(ptr uintptr) {
 	*(*uint16)(unsafe.Pointer(ptr)) = magicNum
 }
 
 /*
-@title
-checkMagic
-@description
-Check object magic number
-@PARAM
-ptr uintptr: Memory block address
-@return
-@note
-*/
+ * @title
+ *	checkMagic
+ * @description
+ *	Check object magic number
+ * @param
+ *  ptr uintptr: Memory block address
+ *
+ * @return
+ * @note
+ */
 func checkMagic(ptr uintptr) bool {
 	return *(*uint16)(unsafe.Pointer(ptr)) == magicNum
 }
 
 /*
-@title
-
-malloc
-
-@description
-
-# Malloc memory block from span
-
-@PARAM
-
-@return
-
-uintptr: Memory block address
-
-@note
-*/
-func (s span) malloc() uintptr {
+ * @title
+ *	malloc
+ * @description
+ *	Malloc memory block from span
+ * @param
+ *
+ * @return
+ *	uintptr: Memory block address
+ * @note
+ */
+func (s *span) malloc() uintptr {
 	idx := s.getObjectIdx()
-	ptr := uintptr(unsafe.Pointer(&s.mem[0])) + uintptr(uint32(idx)(s.objectSize+reservedLen))
+	ptr := uintptr(unsafe.Pointer(&s.mem[0])) + uintptr(uint32(idx)*(s.objectSize+reservedLen))
 	s.objectNum++
-	atomic.AddUint64(&s.objAllocNum, 1)
+	s4SpanMalloc(s)
 
 	return ptr
 }
 
 /*
-@title
-
-free
-
-@description
-
-# Free memory block to span
-
-@PARAM
-
-ptr uintptr: Memory block address
-
-@return
-
-bool: If span is empty after free
-
-@note
-*/
+ * @title
+ *	free
+ * @description
+ *	Free memory block to span
+ * @param
+ *  ptr uintptr: Memory block address
+ *
+ * @return
+ *	bool: If span is empty after free
+ * @note
+ */
 func (s *span) free(ptr uintptr) bool {
 	idx := getObjectIdxByPtr(ptr)
 	resetObject(ptr+dataOffset, s.objectSize)
 	s.objects = append(s.objects, idx)
 	s.objectNum--
-	atomic.AddUint64(&s.objFreeNum, 1)
+	s4SpanFree(s)
 
 	return s.objectNum == 0
 }
 
 /*
-@title
-full
-@description
-If span is full
-@PARAM
-@return
-bool: If span is full
-@note
-*/
+ * @title
+ *	full
+ * @description
+ *	If span is full
+ * @param
+ *
+ * @return
+ *	bool: If span is full
+ * @note
+ */
 func (s *span) full() bool {
 	return len(s.objects) == 0
 }
 
 /*
-@title
-size
-@description
-Object num in span
-@PARAM
-@return
-uint8: Object num in span
-@note
-*/
+ * @title
+ *	size
+ * @description
+ *	Object num in span
+ * @param
+ *
+ * @return
+ *	uint8: Object num in span
+ * @note
+ */
 func (s *span) size() uint8 {
 	return s.objectNum
 }
 
 /*
-@title
-clear
-@description
-Clear span
-@PARAM
-@return
-@note
-*/
+ * @title
+ *	clear
+ * @description
+ *	Clear span
+ * @param
+ *
+ * @return
+ * @note
+ */
 func (s *span) clear() {
 	s.pre = invalidSpanIdx
 	s.next = invalidSpanIdx
 	s.objectNum = 0
-	s.objAllocNum = 0
-	s.objFreeNum = 0
+	s4SpanClear(s)
 	s.mem = nil
 	s.objects = nil
 }
 
 /*
-@title
-Pre
-@description
-Get pre span by chain
-@PARAM
-a *arena: Arena to which span belongs
-@return
-*span: Pre span
-@note
-*/
+ * @title
+ *	Pre
+ * @description
+ *	Get pre span by chain
+ * @param
+ *  a *arena: Arena to which span belongs
+ *
+ * @return
+ *	*span: Pre span
+ * @note
+ */
 func (s *span) Pre(a *arena) *span {
 	return &a.spans[s.pre]
 }
 
 /*
-@title
-Next
-@description
-Get next span by chain
-@PARAM
-a *arena: Arena to which span belongs
-@return
-*span: Next span
-@note
-*/
+ * @title
+ *	Next
+ * @description
+ *	Get next span by chain
+ * @param
+ *  a *arena: Arena to which span belongs
+ *
+ * @return
+ *	*span: Next span
+ * @note
+ */
 func (s *span) Next(a *arena) *span {
 	return &a.spans[s.next]
 }
 
 /*
-@title
-
-# Dx
-
-@description
-
-mem span diagnosis
-
-@PARAM
-
-@return
-
-string: mem span diagnosis report
-
-@note
-*/
+ * @title
+ *	Dx
+ * @description
+ *	mem span diagnosis
+ * @param
+ *
+ * @return
+ *	string: mem span diagnosis report
+ * @note
+ */
 func (s *span) Dx() string {
 	o := ""
 
@@ -874,24 +523,17 @@ type arenaOB struct { // arena out of bounds
 }
 
 /*
-@title
-
-malloc
-
-@description
-
-# Malloc memory block from arenaOB
-
-@PARAM
-
-size uint32: Memory block size
-
-@return
-
-uintptr: Memory block address
-
-@note
-*/
+ * @title
+ *	malloc
+ * @description
+ *	Malloc memory block from arenaOB
+ * @param
+ *  size uint32: Memory block size
+ *
+ * @return
+ *	uintptr: Memory block address
+ * @note
+ */
 func (o *arenaOB) malloc(size uint32) uintptr {
 	s := make([]byte, size+reservedLen, size+reservedLen)
 	ptr := uintptr(unsafe.Pointer(&s[0]))
@@ -901,62 +543,45 @@ func (o *arenaOB) malloc(size uint32) uintptr {
 	setMagic(ptr + dataOffset + uintptr(size))
 	o.objects[idx] = s
 	o.inc(int64(cap(s)), int64(cap(s)))
-	atomic.AddUint64(&o.objAllocNum, 1)
-	atomic.StoreUint64(&o.objectsCap, maxUint64(o.objectsCap, uint64(cap(o.objects))))
-	atomic.StoreUint64(&o.idxPoolCap, maxUint64(o.idxPoolCap, uint64(cap(o.idxPool))))
+	s4ArenaOBMalloc(o)
 
 	return ptr
 }
 
 /*
-@title
-
-free
-
-@description
-
-# Free memory block to arenaOB
-
-@PARAM
-
-ptr uintptr: Memory block address
-
-@return
-
-int64: Memory block size
-
-@note
-*/
+ * @title
+ *	free
+ * @description
+ *	Free memory block to arenaOB
+ * @param
+ *  ptr uintptr: Memory block address
+ *
+ * @return
+ *	int64: Memory block size
+ * @note
+ */
 func (o *arenaOB) free(ptr uintptr) int64 {
 	idx := getOBObjectIdxByPtr(ptr)
 	size := int64(cap(o.objects[idx]))
 	o.dec(size, size)
 	o.objects[idx] = nil
 	o.idxPool = append(o.idxPool, idx)
-	atomic.AddUint64(&o.objFreeNum, 1)
-	atomic.AddUint64(&o.objFreedBytes, uint64(size))
-	atomic.StoreUint64(&o.idxPoolCap, maxUint64(o.idxPoolCap, uint64(cap(o.idxPool))))
+	s4ArenaOBFree(o, size)
 
 	return size - reservedLen
 }
 
 /*
-@title
-
-getObjectIdx
-
-@description
-
-# Get available object index in arenaOB
-
-@PARAM
-
-@return
-
-uint32: Available object index in arenaOB
-
-@note
-*/
+ * @title
+ *	getObjectIdx
+ * @description
+ *	Get available object index in arenaOB
+ * @param
+ *
+ * @return
+ *	uint32: Available object index in arenaOB
+ * @note
+ */
 func (o *arenaOB) getObjectIdx() uint32 {
 	if len(o.idxPool) == 0 {
 		o.objects = append(o.objects, nil)
@@ -970,42 +595,33 @@ func (o *arenaOB) getObjectIdx() uint32 {
 }
 
 /*
-@title
-release
-@description
-Release arenaOB
-@PARAM
-@return
-@note
-*/
+ * @title
+ *	release
+ * @description
+ *	Release arenaOB
+ * @param
+ *
+ * @return
+ * @note
+ */
 func (o *arenaOB) release() {
 	o.objects = nil
 	o.idxPool = nil
-	atomic.StoreUint64(&o.objAllocNum, 0)
-	atomic.StoreUint64(&o.objFreeNum, 0)
-	atomic.StoreUint64(&o.objFreedBytes, 0)
-	atomic.StoreUint64(&o.objectsCap, 0)
-	atomic.StoreUint64(&o.idxPoolCap, 0)
+	s4ArenaOBRelease(o)
 	o.statistic.clear()
 }
 
 /*
-@title
-
-# Dx
-
-@description
-
-mem arena diagnosis
-
-@PARAM
-
-@return
-
-string: mem arena diagnosis report
-
-@note
-*/
+ * @title
+ *	Dx
+ * @description
+ *	mem arena diagnosis
+ * @param
+ *
+ * @return
+ *	string: mem arena diagnosis report
+ * @note
+ */
 func (o *arenaOB) Dx() string {
 	ou := ""
 
@@ -1032,15 +648,16 @@ func (o *arenaOB) Dx() string {
 }
 
 /*
-@title
-size
-@description
-Get inuse size of arenaOB
-@PARAM
-@return
-uint64: Inuse size of arenaOB
-@note
-*/
+ * @title
+ *	size
+ * @description
+ *	Get inuse size of arenaOB
+ * @param
+ *
+ * @return
+ *	uint64: Inuse size of arenaOB
+ * @note
+ */
 func (o *arenaOB) size() uint64 {
 	return uint64(atomic.LoadInt64(&o.inUseSize))
 }
@@ -1061,17 +678,18 @@ type arena struct {
 }
 
 /*
-@title
-initArena
-@description
-Initialize arena instance
-@PARAM
-idx uint8: Arena index
-spanSize uint8: Span size
-objectSize uint32: Object size
-@return
-@note
-*/
+ * @title
+ *	initArena
+ * @description
+ *	Initialize arena instance
+ * @param
+ *  idx uint8: Arena index
+ *  spanSize uint8: Span size
+ *  objectSize uint32: Object size
+ *
+ * @return
+ * @note
+ */
 func (a *arena) initArena(idx, spanSize uint8, objectSize uint32) {
 	a.idx = idx
 	a.spanSize = spanSize
@@ -1080,49 +698,48 @@ func (a *arena) initArena(idx, spanSize uint8, objectSize uint32) {
 }
 
 /*
-@title
-size
-@description
-Get total size of arena
-@PARAM
-@return
-uint64: Total size of arena
-@note
-*/
+ * @title
+ *	size
+ * @description
+ *	Get total size of arena
+ * @param
+ *
+ * @return
+ *	uint64: Total size of arena
+ * @note
+ */
 func (a *arena) size() uint64 {
 	return uint64(a.objectSize+reservedLen) * uint64(a.spanSize) * uint64(atomic.LoadUint32(&a.spanNum))
 }
 
 /*
-@title
-release
-@description
-Release arena
-@PARAM
-@return
-@note
-*/
+ * @title
+ *	release
+ * @description
+ *	Release arena
+ * @param
+ *
+ * @return
+ * @note
+ */
 func (a *arena) release() {
 	atomic.StoreUint32(&a.spanNum, 0)
-	atomic.StoreUint64(&a.spanAllocNum, 0)
-	atomic.StoreUint64(&a.spanFreedNum, 0)
-	atomic.StoreUint64(&a.spanFreedBytes, 0)
-	atomic.StoreUint64(&a.spanFreedObjs, 0)
-	atomic.StoreUint64(&a.objRetainNum, 0)
+	s4ArenaRelease(a)
 	a.initSpans()
 	a.idxPool = nil
 	a.statistic.clear()
 }
 
 /*
-@title
-initSpans
-@description
-Initialize spans in arena
-@PARAM
-@return
-@note
-*/
+ * @title
+ *	initSpans
+ * @description
+ *	Initialize spans in arena
+ * @param
+ *
+ * @return
+ * @note
+ */
 func (a *arena) initSpans() {
 	a.spans = make([]span, 1, 1)
 	a.spans[0].idx = sentinel
@@ -1131,50 +748,46 @@ func (a *arena) initSpans() {
 }
 
 /*
-@title
-ObjectSize
-@description
-Get object size of arena
-@PARAM
-@return
-uint32: Object size of arena
-@note
-*/
+ * @title
+ *	ObjectSize
+ * @description
+ *	Get object size of arena
+ * @param
+ *
+ * @return
+ *	uint32: Object size of arena
+ * @note
+ */
 func (a *arena) ObjectSize() uint32 {
 	return a.objectSize
 }
 
 /*
-@title
-SpanNum
-@description
-Get span num of arena
-@PARAM
-@return
-uint32: Span num of arena
-@note
-*/
+ * @title
+ *	SpanNum
+ * @description
+ *	Get span num of arena
+ * @param
+ *
+ * @return
+ *	uint32: Span num of arena
+ * @note
+ */
 func (a *arena) SpanNum() uint32 {
 	return atomic.LoadUint32(&a.spanNum)
 }
 
 /*
-@title
-
-getSpanIdx
-
-@description
-
-# Get available span index in arena
-
-@PARAM
-
-@return
-
-uint32: Available span index in arena
-
-@note
-*/
+ * @title
+ *	getSpanIdx
+ * @description
+ *	Get available span index in arena
+ * @param
+ *
+ * @return
+ *	uint32: Available span index in arena
+ * @note
+ */
 func (a *arena) getSpanIdx() uint32 {
 	if len(a.idxPool) == 0 {
 		a.spans = append(a.spans, span{})
@@ -1188,15 +801,16 @@ func (a *arena) getSpanIdx() uint32 {
 }
 
 /*
-@title
-toHead
-@description
-Move span to chain head
-@PARAM
-s *span: Span to move
-@return
-@note
-*/
+ * @title
+ *	toHead
+ * @description
+ *	Move span to chain head
+ * @param
+ *  s *span: Span to move
+ *
+ * @return
+ * @note
+ */
 func (a *arena) toHead(s *span) {
 	s.next = a.sentinel().next
 	s.pre = sentinel
@@ -1205,15 +819,16 @@ func (a *arena) toHead(s *span) {
 }
 
 /*
-@title
-toTail
-@description
-Move span to chain tail
-@PARAM
-s *span: Span to move
-@return
-@note
-*/
+ * @title
+ *	toTail
+ * @description
+ *	Move span to chain tail
+ * @param
+ *  s *span: Span to move
+ *
+ * @return
+ * @note
+ */
 func (a *arena) toTail(s *span) {
 	s.Next(a).pre = s.pre
 	s.Pre(a).next = s.next
@@ -1224,81 +839,78 @@ func (a *arena) toTail(s *span) {
 }
 
 /*
-@title
-remove
-@description
-Remove span from arena
-@PARAM
-s *span: Span to remove
-@return
-@note
-*/
+ * @title
+ *	remove
+ * @description
+ *	Remove span from arena
+ * @param
+ *  s *span: Span to remove
+ *
+ * @return
+ * @note
+ */
 func (a *arena) remove(s *span) {
 	s.Next(a).pre = s.pre
 	s.Pre(a).next = s.next
 }
 
 /*
-@title
-sentinel
-@description
-Get sentinel span in arena
-@PARAM
-@return
-*span: Sentinel span
-@note
-*/
+ * @title
+ *	sentinel
+ * @description
+ *	Get sentinel span in arena
+ * @param
+ *
+ * @return
+ *	*span: Sentinel span
+ * @note
+ */
 func (a *arena) sentinel() *span {
 	return &a.spans[sentinel]
 }
 
 /*
-@title
-head
-@description
-Get head span in arena
-@PARAM
-@return
-*span: Head span
-@note
-*/
+ * @title
+ *	head
+ * @description
+ *	Get head span in arena
+ * @param
+ *
+ * @return
+ *	*span: Head span
+ * @note
+ */
 func (a *arena) head() *span {
 	return &a.spans[a.spans[sentinel].next]
 }
 
 /*
-@title
-tail
-@description
-Get tail span in arena
-@PARAM
-@return
-*span: Tail span
-@note
-*/
+ * @title
+ *	tail
+ * @description
+ *	Get tail span in arena
+ * @param
+ *
+ * @return
+ *	*span: Tail span
+ * @note
+ */
 func (a *arena) tail() *span {
 	return &a.spans[a.spans[sentinel].pre]
 }
 
 /*
-@title
-
-malloc
-
-@description
-
-# Malloc memory block from arena
-
-@PARAM
-
-size uint32: Memory block size
-
-@return
-
-uintptr: Memory block address
-
-@note
-*/
+ * @title
+ *	malloc
+ * @description
+ *	Malloc memory block from arena
+ * @param
+ *  size uint32: Memory block size
+ *
+ * @return
+ *	uintptr: Memory block address
+ * @note
+ */
 func (a *arena) malloc(size uint32) uintptr {
 	a.inc(int64(a.objectSize), int64(size))
 
@@ -1308,7 +920,7 @@ func (a *arena) malloc(size uint32) uintptr {
 		s = &a.spans[idx]
 		s.initSpan(idx, a.spanSize, a.objectSize)
 		atomic.AddUint32(&a.spanNum, 1)
-		atomic.AddUint64(&a.spanAllocNum, 1)
+		s4ArenaSpanAlloc(a)
 		a.toHead(s)
 	}
 
@@ -1322,15 +934,16 @@ func (a *arena) malloc(size uint32) uintptr {
 }
 
 /*
-@title
-move
-@description
-Move span as sorting rules
-@PARAM
-s *span: Span to move
-@return
-@note
-*/
+ * @title
+ *	move
+ * @description
+ *	Move span as sorting rules
+ * @param
+ *  s *span: Span to move
+ *
+ * @return
+ * @note
+ */
 func (a *arena) move(s *span) {
 	if s.pre != sentinel && s.Pre(a).full() {
 		a.moveForward(s)
@@ -1340,37 +953,32 @@ func (a *arena) move(s *span) {
 }
 
 /*
-@title
-moveForward
-@description
-Move span forward as sorting rules
-@PARAM
-s *span: Span to move
-@return
-@note
-*/
+ * @title
+ *	moveForward
+ * @description
+ *	Move span forward as sorting rules
+ * @param
+ *  s *span: Span to move
+ *
+ * @return
+ * @note
+ */
 func (a *arena) moveForward(s *span) {
 	a.remove(s)
 	a.toHead(s)
 }
 
 /*
-@title
-
-moveBackward
-
-@description
-
-# Move span backward as sorting rules
-
-@PARAM
-
-s *span: Span to move
-
-@return
-
-@note
-*/
+ * @title
+ *	moveBackward
+ * @description
+ *	Move span backward as sorting rules
+ * @param
+ *  s *span: Span to move
+ *
+ * @return
+ * @note
+ */
 func (a *arena) moveBackward(s *span) {
 	var target *span
 	n := s
@@ -1388,16 +996,17 @@ func (a *arena) moveBackward(s *span) {
 }
 
 /*
-@title
-swap
-@description
-Swap two spans
-@PARAM
-x *span: Span to swap
-y *span: Span to swap
-@return
-@note
-*/
+ * @title
+ *	swap
+ * @description
+ *	Swap two spans
+ * @param
+ *  x *span: Span to swap
+ *  y *span: Span to swap
+ *
+ * @return
+ * @note
+ */
 func (a *arena) swap(x, y *span) {
 	// adjacent swap
 	if y.idx == x.Next(a).idx {
@@ -1418,22 +1027,16 @@ func (a *arena) swap(x, y *span) {
 }
 
 /*
-@title
-
-free
-
-@description
-
-# Free memory block to arena
-
-@PARAM
-
-ptr uintptr: Memory block address
-
-@return
-
-@note
-*/
+ * @title
+ *	free
+ * @description
+ *	Free memory block to arena
+ * @param
+ *  ptr uintptr: Memory block address
+ *
+ * @return
+ * @note
+ */
 func (a *arena) free(ptr uintptr) {
 	a.dec(int64(a.objectSize), int64(getPtrDataLen(ptr)))
 
@@ -1442,14 +1045,12 @@ func (a *arena) free(ptr uintptr) {
 
 	if s.free(ptr) {
 		a.remove(s)
-		atomic.AddUint64(&a.spanFreedNum, 1)
-		atomic.AddUint64(&a.spanFreedBytes, uint64(a.objectSize+reservedLen)*uint64(a.spanSize))
-		atomic.AddUint64(&a.spanFreedObjs, uint64(a.spanSize))
+		s4ArenaSpanFree(a)
 		s.clear()
 		a.idxPool = append(a.idxPool, idx)
 		atomic.AddUint32(&a.spanNum, ^uint32(0))
 	} else {
-		atomic.AddUint64(&a.objRetainNum, 1)
+		s4ArenaObjRetain(a)
 		if atomic.LoadUint32(&a.spanNum) > 1 {
 			a.move(s)
 		}
@@ -1457,22 +1058,16 @@ func (a *arena) free(ptr uintptr) {
 }
 
 /*
-@title
-
-# Dx
-
-@description
-
-mem arena diagnosis
-
-@PARAM
-
-@return
-
-string: mem arena diagnosis report
-
-@note
-*/
+ * @title
+ *	Dx
+ * @description
+ *	mem arena diagnosis
+ * @param
+ *
+ * @return
+ *	string: mem arena diagnosis report
+ * @note
+ */
 func (a *arena) Dx() string {
 	o := ""
 
@@ -1481,42 +1076,6 @@ func (a *arena) Dx() string {
 	}
 
 	return o
-}
-
-/*
-@title
-
-activeSpans
-
-@description
-
-# Get active span stats in arena by chain order
-
-@PARAM
-
-@return
-
-[]SpanStats: Active span stats in arena
-
-@note
-*/
-func (a *arena) activeSpans() []SpanStats {
-	if atomic.LoadUint32(&a.spanNum) == 0 {
-		return nil
-	}
-
-	spans := make([]SpanStats, 0, a.spanNum)
-	for s := a.head(); s.idx != sentinel; s = s.Next(a) {
-		spans = append(spans, &spanStats{
-			idx:         s.idx,
-			objectNum:   s.objectNum,
-			spanSize:    s.spanSize,
-			objAllocNum: atomic.LoadUint64(&s.objAllocNum),
-			objFreeNum:  atomic.LoadUint64(&s.objFreeNum),
-		})
-	}
-
-	return spans
 }
 
 type memPool struct {
@@ -1528,38 +1087,32 @@ type memPool struct {
 }
 
 /*
-@title
-Name
-@description
-Get pool name
-@PARAM
-@return
-string: Pool name
-@note
-*/
+ * @title
+ *	Name
+ * @description
+ *	Get pool name
+ * @param
+ *
+ * @return
+ *	string: Pool name
+ * @note
+ */
 func (m *memPool) Name() string {
 	return m.name
 }
 
 /*
-@title
-
-# Malloc
-
-@description
-
-# Malloc memory block
-
-@PARAM
-
-size uint32: Memory block size
-
-@return
-
-uintptr: Memory block address
-
-@note
-*/
+ * @title
+ *	Malloc
+ * @description
+ *	Malloc memory block
+ * @param
+ *  size uint32: Memory block size
+ *
+ * @return
+ *	uintptr: Memory block address
+ * @note
+ */
 func (m *memPool) Malloc(size uint32) uintptr {
 	if size == 0 {
 		return 0
@@ -1583,22 +1136,16 @@ func (m *memPool) Malloc(size uint32) uintptr {
 }
 
 /*
-@title
-
-# Free
-
-@description
-
-# Free memory block
-
-@PARAM
-
-ptr uintptr: Memory block address
-
-@return
-
-@note
-*/
+ * @title
+ *	Free
+ * @description
+ *	Free memory block
+ * @param
+ *  ptr uintptr: Memory block address
+ *
+ * @return
+ * @note
+ */
 func (m *memPool) Free(ptr uintptr) {
 	ptrO := ptr - dataOffset
 	idx := getArenaIdxByPtr(ptrO)
@@ -1614,14 +1161,15 @@ func (m *memPool) Free(ptr uintptr) {
 }
 
 /*
-@title
-Release
-@description
-Release all allocated memory blocks
-@PARAM
-@return
-@note
-*/
+ * @title
+ *	Release
+ * @description
+ *	Release all allocated memory blocks
+ * @param
+ *
+ * @return
+ * @note
+ */
 func (m *memPool) Release() {
 	for i := range m.arenas {
 		m.arenas[i].release()
@@ -1631,41 +1179,33 @@ func (m *memPool) Release() {
 }
 
 /*
-@title
-Close
-@description
-Close mem pool
-@PARAM
-@return
-@note
-*/
+ * @title
+ *	Close
+ * @description
+ *	Close mem pool
+ * @param
+ *
+ * @return
+ * @note
+ */
 func (m *memPool) Close() {
 	deletePool(m.name)
 }
 
 /*
-@title
-
-# NewMPool
-
-@description
-
-# Create new MPool instance
-
-@PARAM
-
-name string: Pool name
-
-arenaProp ArenaProp: Arena Property
-
-@return
-
-MPool: MPool instance
-
-error: Any errors that may occur in this process
-
-@note
-*/
+ * @title
+ *	NewMPool
+ * @description
+ *	Create new MPool instance
+ * @param
+ *  name string: Pool name
+ *  arenaProp ArenaProp: Arena Property
+ *
+ * @return
+ *	MPool: MPool instance
+ *	error: Any errors that may occur in this process
+ * @note
+ */
 func NewMPool(name string, arenaProp ArenaProp) (MPool, error) {
 	m := &memPool{
 		name: name,
@@ -1687,38 +1227,33 @@ func NewMPool(name string, arenaProp ArenaProp) (MPool, error) {
 }
 
 /*
-@title
-New
-@description
-Create new MPool instance
-@PARAM
-name string: Pool name
-@return
-MPool: MPool instance
-error: Any errors that may occur in this process
-@note
-*/
+ * @title
+ *	New
+ * @description
+ *	Create new MPool instance
+ * @param
+ *  name string: Pool name
+ *
+ * @return
+ *	MPool: MPool instance
+ *	error: Any errors that may occur in this process
+ * @note
+ */
 func (m *memPool) New(name string) (MPool, error) {
 	return NewMPool(name, m.arenaProp)
 }
 
 /*
-@title
-
-# Size
-
-@description
-
-# Get total size of mem pool
-
-@PARAM
-
-@return
-
-uint64: Total size of mem pool
-
-@note
-*/
+ * @title
+ *	Size
+ * @description
+ *	Get total size of mem pool
+ * @param
+ *
+ * @return
+ *	uint64: Total size of mem pool
+ * @note
+ */
 func (m *memPool) Size() uint64 {
 	var totalSize uint64
 	for i := range m.arenas {
@@ -1730,70 +1265,46 @@ func (m *memPool) Size() uint64 {
 }
 
 /*
-@title
-
-# ArenaStats
-
-@description
-
-# Get all ArenaStats in mem pool
-
-@PARAM
-
-@return
-
-[]ArenaStats: All ArenaStats in mem pool
-
-@note
-*/
+ * @title
+ *	ArenaStats
+ * @description
+ *	Get all ArenaStats in mem pool
+ * @param
+ *
+ * @return
+ *	[]ArenaStats: All ArenaStats in mem pool
+ * @note
+ */
 func (m *memPool) ArenaStats() []ArenaStats {
-	var states []ArenaStats
-	for i := range m.arenas {
-		a := &m.arenas[i]
-		states = append(states, newArenaStats(m.name, a.objectSize, atomic.LoadUint32(&a.spanNum), a.spanSize, a.InUsed(),
-			atomic.LoadUint64(&a.spanAllocNum), atomic.LoadUint64(&a.spanFreedNum),
-			atomic.LoadUint64(&a.spanFreedBytes), atomic.LoadUint64(&a.spanFreedObjs),
-			atomic.LoadUint64(&a.objRetainNum), a.activeSpans()))
-	}
-
-	return states
+	return s4PoolArenaStats(m)
 }
 
 /*
-@title
-OBStats
-@description
-Get arenaOB stats of mem pool
-@PARAM
-@return
-ArenaOBStats: ArenaOB stats of mem pool
-@note
-*/
+ * @title
+ *	OBStats
+ * @description
+ *	Get arenaOB stats of mem pool
+ * @param
+ *
+ * @return
+ *	ArenaOBStats: ArenaOB stats of mem pool
+ * @note
+ */
 func (m *memPool) OBStats() ArenaOBStats {
-	o := &m.arenaOB
-	return newArenaOBStats(m.name, o.InUsed(),
-		atomic.LoadUint64(&o.objAllocNum), atomic.LoadUint64(&o.objFreeNum),
-		atomic.LoadUint64(&o.objFreedBytes), atomic.LoadUint64(&o.objectsCap),
-		atomic.LoadUint64(&o.idxPoolCap))
+	return s4PoolOBStats(m)
 }
 
 /*
-@title
-
-# Dx
-
-@description
-
-mem pool diagnosis
-
-@PARAM
-
-@return
-
-string: mem pool diagnosis report
-
-@note
-*/
+ * @title
+ *	Dx
+ * @description
+ *	mem pool diagnosis
+ * @param
+ *
+ * @return
+ *	string: mem pool diagnosis report
+ * @note
+ */
 func (m *memPool) Dx() string {
 	o := ""
 
@@ -1811,26 +1322,18 @@ func (m *memPool) Dx() string {
 }
 
 /*
-@title
-
-# ToBytes
-
-@description
-
-# Transfer memory block address to byte slice
-
-@PARAM
-
-size int: Byte slice size
-
-ptr uintptr: Memory block address
-
-@return
-
-[]byte: Byte slice
-
-@note
-*/
+ * @title
+ *	ToBytes
+ * @description
+ *	Transfer memory block address to byte slice
+ * @param
+ *  size int: Byte slice size
+ *  ptr uintptr: Memory block address
+ *
+ * @return
+ *	[]byte: Byte slice
+ * @note
+ */
 func ToBytes(size int, ptr uintptr) []byte {
 	var byteSlice []byte
 	s := (*reflect.SliceHeader)(unsafe.Pointer(&byteSlice))
@@ -1840,146 +1343,147 @@ func ToBytes(size int, ptr uintptr) []byte {
 }
 
 /*
-@title
-getArenaIdxByPtr
-@description
-Get arena index value from memory block address
-@PARAM
-ptr uintptr: Memory block address
-@return
-uint8: Arena index
-@note
-*/
+ * @title
+ *	getArenaIdxByPtr
+ * @description
+ *	Get arena index value from memory block address
+ * @param
+ *  ptr uintptr: Memory block address
+ *
+ * @return
+ *	uint8: Arena index
+ * @note
+ */
 func getArenaIdxByPtr(ptr uintptr) uint8 {
 	return *(*uint8)(unsafe.Pointer(ptr + arenaIdxOffset))
 }
 
 /*
-@title
-setPtrArenaIdx
-@description
-Set arena index value to memory block header
-@PARAM
-ptr uintptr: Memory block address
-idx uint8: Arena index
-@return
-@note
-*/
+ * @title
+ *	setPtrArenaIdx
+ * @description
+ *	Set arena index value to memory block header
+ * @param
+ *  ptr uintptr: Memory block address
+ *  idx uint8: Arena index
+ *
+ * @return
+ * @note
+ */
 func setPtrArenaIdx(ptr uintptr, idx uint8) {
 	*(*uint8)(unsafe.Pointer(ptr + arenaIdxOffset)) = idx
 }
 
 /*
-@title
-getPtrDataLen
-@description
-Get data length value from memory block address
-@PARAM
-ptr uintptr: Memory block address
-@return
-uint16: Data length
-@note
-*/
+ * @title
+ *	getPtrDataLen
+ * @description
+ *	Get data length value from memory block address
+ * @param
+ *  ptr uintptr: Memory block address
+ *
+ * @return
+ *	uint16: Data length
+ * @note
+ */
 func getPtrDataLen(ptr uintptr) uint16 {
 	return *(*uint16)(unsafe.Pointer(ptr + dataLenOffset))
 }
 
 /*
-@title
-setPtrDataLen
-@description
-Set data length value to memory block header
-@PARAM
-ptr uintptr: Memory block address
-len uint16: Data length
-@return
-@note
-*/
+ * @title
+ *	setPtrDataLen
+ * @description
+ *	Set data length value to memory block header
+ * @param
+ *  ptr uintptr: Memory block address
+ *  len uint16: Data length
+ *
+ * @return
+ * @note
+ */
 func setPtrDataLen(ptr uintptr, len uint16) {
 	*(*uint16)(unsafe.Pointer(ptr + dataLenOffset)) = len
 }
 
 /*
-@title
-getSpanIdxByPtr
-@description
-Get span index value from memory block address
-@PARAM
-ptr uintptr: Memory block address
-@return
-uint32: Span index
-@note
-*/
+ * @title
+ *	getSpanIdxByPtr
+ * @description
+ *	Get span index value from memory block address
+ * @param
+ *  ptr uintptr: Memory block address
+ *
+ * @return
+ *	uint32: Span index
+ * @note
+ */
 func getSpanIdxByPtr(ptr uintptr) uint32 {
 	return *(*uint32)(unsafe.Pointer(ptr + spanIdxOffset))
 }
 
 /*
-@title
-setPtrSpanIdx
-@description
-Set span index value to memory block header
-@PARAM
-ptr uintptr: Memory block address
-idx uint32: Span index
-@return
-@note
-*/
+ * @title
+ *	setPtrSpanIdx
+ * @description
+ *	Set span index value to memory block header
+ * @param
+ *  ptr uintptr: Memory block address
+ *  idx uint32: Span index
+ *
+ * @return
+ * @note
+ */
 func setPtrSpanIdx(ptr uintptr, idx uint32) {
 	*(*uint32)(unsafe.Pointer(ptr + spanIdxOffset)) = idx
 }
 
 /*
-@title
-getOBObjectIdxByPtr
-@description
-Get object index value from memory block address
-@PARAM
-ptr uintptr: Memory block address
-@return
-uint32: Object index
-@note
-*/
+ * @title
+ *	getOBObjectIdxByPtr
+ * @description
+ *	Get object index value from memory block address
+ * @param
+ *  ptr uintptr: Memory block address
+ *
+ * @return
+ *	uint32: Object index
+ * @note
+ */
 func getOBObjectIdxByPtr(ptr uintptr) uint32 {
 	return *(*uint32)(unsafe.Pointer(ptr + objectIdxOffsetOB))
 }
 
 /*
-@title
-setPtrOBObjectIdx
-@description
-Set object index value to memory block header
-@PARAM
-ptr uintptr: Memory block address
-idx uint32: Object index
-@return
-@note
-*/
+ * @title
+ *	setPtrOBObjectIdx
+ * @description
+ *	Set object index value to memory block header
+ * @param
+ *  ptr uintptr: Memory block address
+ *  idx uint32: Object index
+ *
+ * @return
+ * @note
+ */
 func setPtrOBObjectIdx(ptr uintptr, idx uint32) {
 	*(*uint32)(unsafe.Pointer(ptr + objectIdxOffsetOB)) = idx
 }
 
 var emptyObject = make([]byte, math.MaxUint16, math.MaxUint16)
 
-// maxUint64 returns the larger of two uint64 values (统计辅助函数)
-func maxUint64(a, b uint64) uint64 {
-	if a > b {
-		return a
-	}
-	return b
-}
-
 /*
-@title
-resetObject
-@description
-Reset memory block
-@PARAM
-object uintptr: Memory block address
-size uint32: Memory block size
-@return
-@note
-*/
+ * @title
+ *	resetObject
+ * @description
+ *	Reset memory block
+ * @param
+ *  object uintptr: Memory block address
+ *  size uint32: Memory block size
+ *
+ * @return
+ * @note
+ */
 func resetObject(object uintptr, size uint32) {
 	var byteSlice []byte
 	s := (*reflect.SliceHeader)(unsafe.Pointer(&byteSlice))
@@ -2005,18 +1509,19 @@ type ArenaItem struct {
 }
 
 /*
-@title
-NewArenaItem
-@description
-Create new ArenaItem instance
-@PARAM
-level int: Arena level
-spanSize uint8: Span size
-objectSize uint32: Object size
-@return
-ArenaItem: ArenaItem instance
-@note
-*/
+ * @title
+ *	NewArenaItem
+ * @description
+ *	Create new ArenaItem instance
+ * @param
+ *  level int: Arena level
+ *  spanSize uint8: Span size
+ *  objectSize uint32: Object size
+ *
+ * @return
+ *	ArenaItem: ArenaItem instance
+ * @note
+ */
 func NewArenaItem(level int, spanSize uint8, objectSize uint32) ArenaItem {
 	return ArenaItem{Level: level, SpanSize: spanSize, ObjectSize: objectSize}
 }
@@ -2028,24 +1533,17 @@ type fixedArenaProp struct {
 }
 
 /*
-@title
-
-# GetArenaIdx
-
-@description
-
-# Get arena index by malloc size
-
-@PARAM
-
-size uint32: Malloc size
-
-@return
-
-uint8: Arena index
-
-@note
-*/
+ * @title
+ *	GetArenaIdx
+ * @description
+ *	Get arena index by malloc size
+ * @param
+ *  size uint32: Malloc size
+ *
+ * @return
+ *	uint8: Arena index
+ * @note
+ */
 func (f *fixedArenaProp) GetArenaIdx(size uint32) uint8 {
 	if size > f.maxSize {
 		return ArenaOutOfBounds
@@ -2060,42 +1558,34 @@ func (f *fixedArenaProp) GetArenaIdx(size uint32) uint8 {
 }
 
 /*
-@title
-GetArenaItems
-@description
-Get arena items
-@PARAM
-@return
-[]ArenaItem: Arena items
-@note
-*/
+ * @title
+ *	GetArenaItems
+ * @description
+ *	Get arena items
+ * @param
+ *
+ * @return
+ *	[]ArenaItem: Arena items
+ * @note
+ */
 func (f *fixedArenaProp) GetArenaItems() []ArenaItem {
 	return f.items
 }
 
 /*
-@title
-
-# NewFixedArenaProp
-
-@description
-
-# Create new ArenaProp instance which has fixed arena interval
-
-@PARAM
-
-interval uint32: Size between neighboring arena
-
-maxSize uint32: Max arena size
-
-spanSize uint8: Span size
-
-@return
-
-ArenaProp: ArenaProp instance
-
-@note
-*/
+ * @title
+ *	NewFixedArenaProp
+ * @description
+ *	Create new ArenaProp instance which has fixed arena interval
+ * @param
+ *  interval uint32: Size between neighboring arena
+ *  maxSize uint32: Max arena size
+ *  spanSize uint8: Span size
+ *
+ * @return
+ *	ArenaProp: ArenaProp instance
+ * @note
+ */
 func NewFixedArenaProp(interval, maxSize uint32, spanSize uint8) ArenaProp {
 	var items []ArenaItem
 	level := 0
@@ -2110,17 +1600,18 @@ func NewFixedArenaProp(interval, maxSize uint32, spanSize uint8) ArenaProp {
 }
 
 /*
-@title
-NewMPoolDefault
-@description
-Create new MPool instance by default arena property
-@PARAM
-name string: Pool name
-@return
-MPool: MPool instance
-error: Any errors that may occur in this process
-@note
-*/
+ * @title
+ *	NewMPoolDefault
+ * @description
+ *	Create new MPool instance by default arena property
+ * @param
+ *  name string: Pool name
+ *
+ * @return
+ *	MPool: MPool instance
+ *	error: Any errors that may occur in this process
+ * @note
+ */
 func NewMPoolDefault(name string) (MPool, error) {
 	return NewMPool(name, NewFixedArenaProp(DefaultArenaInterval, MaxObjectSize, DefaultSpanSize))
 }
