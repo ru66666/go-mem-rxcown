@@ -21,6 +21,127 @@ func s4MaxUint64(a, b uint64) uint64 {
 	return b
 }
 
+/* ============================ span 隔离模式（碎片优化） ============================ */
+
+// s4SpanIsolation span 隔离模式开关（[s4改] 方案A）：
+//
+//	true  = 顺序填满一个 span 再开新 span，跳过 toTail/move 排序，
+//	        尽量让同一会话的对象聚在同一 span，杀会话时 span 整体清空易回收
+//	false = 原行为（span 用满后移到链表尾、free 时 move 排序）
+var s4SpanIsolation = true
+
+/* [s4改] 方案B：freeSpan 复用链（span 缓存）
+ *
+ * 背景：整 span 回收时 clear() 把 mem 大切片丢给 GC（free 潮时一次上万块），
+ *       随后的 malloc 潮又重新 make 同样大小的切片，GC 双重负担。
+ * 方案：整 span 回收时不丢 mem，入 arena 级复用链；malloc 新建分支优先从链里弹
+ *       一个现成 span（免 make、免逐槽位 magic 初始化）。
+ * 容量：按字节预算限制（s4SpanCacheBytes），超预算的 span 退回 clear() 丢给 GC，
+ *       保证缓存不放大内存占用（缓存水位 ≈ 最近一次 free 潮峰值，而非累计）。
+ *
+ * 日志实测（1020.log）：稳态 free 潮每快照增量 mean≈1067、max=8701 个 span，
+ * 加权平均 span 大小 17.1KB；潮集中在少数 arena，128KB/arena 预算可容纳
+ * 32B 档 ~186 个或 4KB 档 ~1 个，足够覆盖单 arena 潮峰，全局水位远小于收益。
+ */
+const s4SpanCacheBytes = 128 * 1024
+
+// s4SpanCacheOn 复用链开关（true=启用缓存）
+var s4SpanCacheOn = true
+
+// s4SpanCacheStats 复用链统计：hit=malloc 命中复用链, evict=入链时因预算被丢弃, entry=当前在链个数
+var s4SpanCacheStats struct {
+	hit   uint64
+	evict uint64
+	entry uint64
+}
+
+// s4SpanRecycle 整 span 回收入复用链：保留 mem/objects 底层切片，仅重置游标。
+// 预算已满时返回 false（调用方走原 clear() 路径丢给 GC）。
+func s4SpanRecycle(list *[]span, s *span, spanBytes int) bool {
+	if !s4SpanCacheOn {
+		return false
+	}
+	// 字节预算：链内已有 span 总字节 + 本 span 不超预算
+	if (len(*list)+1)*spanBytes > s4SpanCacheBytes {
+		atomic.AddUint64(&s4SpanCacheStats.evict, 1)
+		return false
+	}
+	s.objectNum = 0
+	s.objects = s.objects[:0] // 游标归零，底层数组保留
+	*list = append(*list, *s) // 结构体值拷贝入链，mem 指针随行
+	atomic.AddUint64(&s4SpanCacheStats.entry, 1)
+	s.clear() // 原位置清引用，避免与链中副本双重持有
+	return true
+}
+
+// s4SpanReuse 从复用链弹出一个现成 span 到 s（mem 直接可用，免 make）。
+// 返回 true 表示命中；false 表示链空，调用方走 initSpan 正常新建。
+// 复用后重新铺满槽位空闲序（O(spanSize) 的 uint8 赋值，远小于 make+magic 初始化）。
+func s4SpanReuse(list *[]span, s *span) bool {
+	n := len(*list)
+	if n == 0 || !s4SpanCacheOn {
+		return false
+	}
+	cached := (*list)[n-1]
+	*list = (*list)[:n-1]
+	atomic.AddUint64(&s4SpanCacheStats.entry, ^uint64(0))
+
+	// 接管缓存的 mem，恢复槽位空闲序（与 initSpan 一致）
+	s.mem = cached.mem
+	s.objects = make([]uint8, s.spanSize, s.spanSize)
+	for i := uint8(0); i < s.spanSize; i++ {
+		s.objects[i] = i
+	}
+	s.objectNum = 0
+	atomic.AddUint64(&s4SpanCacheStats.hit, 1)
+	return true
+}
+
+// s4SpanCacheSnapshot 返回复用链统计快照（gc-snapshot 聚合段用）
+func s4SpanCacheSnapshot() (hit, evict, entry uint64) {
+	return atomic.LoadUint64(&s4SpanCacheStats.hit),
+		atomic.LoadUint64(&s4SpanCacheStats.evict),
+		atomic.LoadUint64(&s4SpanCacheStats.entry)
+}
+
+// s4SpanCacheDrop 复用链被整体清空（arena release）时校正 entry 计数
+func s4SpanCacheDrop(n int) {
+	for i := 0; i < n; i++ {
+		atomic.AddUint64(&s4SpanCacheStats.entry, ^uint64(0))
+	}
+}
+
+// s4SpanFragSample free 时刻对 span 做碎片采样：按空槽率分桶累计（碎片度量）
+// 桶: 0:<25%, 1:<50%, 2:<75%, 3:<100%(有在用对象), 4: 全空(本可回收但走不到这)
+var s4FragBuckets [4]uint64
+
+// s4SpanFragSample 计算 span 当前空槽占比并计入分桶
+func s4SpanFragSample(s *span) {
+	total := int(s.spanSize)
+	if total <= 0 {
+		return
+	}
+	inUse := int(s.objectNum)
+	if inUse < 0 || inUse > total { // 防御：计数异常时跳过采样
+		return
+	}
+	emptyRatio := (total - inUse) * 4 / total // 0..3
+	if emptyRatio > 3 {
+		emptyRatio = 3
+	}
+	atomic.AddUint64(&s4FragBuckets[emptyRatio], 1)
+}
+
+// s4FragSnapshot 返回当前碎片分桶快照（gc-snapshot 聚合段用）
+func s4FragSnapshot() [4]uint64 {
+	return [4]uint64{
+		atomic.LoadUint64(&s4FragBuckets[0]),
+		atomic.LoadUint64(&s4FragBuckets[1]),
+		atomic.LoadUint64(&s4FragBuckets[2]),
+		atomic.LoadUint64(&s4FragBuckets[3]),
+	}
+}
+
 /* ============================ span 统计（写路径） ============================ */
 
 // s4SpanInit 重置 span 统计计数（initSpan 时调用）

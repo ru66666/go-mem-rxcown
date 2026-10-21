@@ -538,6 +538,15 @@ func printAgg(b *bufio.Writer, prefix string, cur *sampleSnapshot) {
 			size, item.spanAllocNum, item.spanFreedNum))
 	}
 
+	// [s4改] [GC.Frag]：free 时刻 span 空槽率分布（碎片度量），4 桶：<25%/<50%/<75%/<100%
+	frag := s4FragSnapshot()
+	b.WriteString(fmt.Sprintf("[GC.Frag] empty<25%%: %d, <50%%: %d, <75%%: %d, <100%%: %d\n",
+		frag[0], frag[1], frag[2], frag[3]))
+
+	// [s4改] [GC.SpanCache]：freeSpan 复用链效果（命中免 make/免 GC 回收）
+	ch, ev, en := s4SpanCacheSnapshot()
+	b.WriteString(fmt.Sprintf("[GC.SpanCache] hit: %d, evict: %d, cached: %d\n", ch, ev, en))
+
 	// [GC.Pool.Top]：按累计释放字节排前 3 的 pool 名字
 	type topPool struct {
 		name  string
