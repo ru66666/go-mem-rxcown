@@ -21,28 +21,20 @@ func s4MaxUint64(a, b uint64) uint64 {
 	return b
 }
 
-/* ============================ span 隔离模式（碎片优化） ============================ */
+/* ============================ freeSpan 复用链（方案B，10.21新增；方案A 已淘汰移除） ============================ */
 
-// s4SpanIsolation span 隔离模式开关（[s4改] 方案A）：
+// 方案B：freeSpan 复用链（span 缓存）
 //
-//	true  = 顺序填满一个 span 再开新 span，跳过 toTail/move 排序，
-//	        尽量让同一会话的对象聚在同一 span，杀会话时 span 整体清空易回收
-//	false = 原行为（span 用满后移到链表尾、free 时 move 排序）
-var s4SpanIsolation = true
-
-/* [s4改] 方案B：freeSpan 复用链（span 缓存）
- *
- * 背景：整 span 回收时 clear() 把 mem 大切片丢给 GC（free 潮时一次上万块），
- *       随后的 malloc 潮又重新 make 同样大小的切片，GC 双重负担。
- * 方案：整 span 回收时不丢 mem，入 arena 级复用链；malloc 新建分支优先从链里弹
- *       一个现成 span（免 make、免逐槽位 magic 初始化）。
- * 容量：按字节预算限制（s4SpanCacheBytes），超预算的 span 退回 clear() 丢给 GC，
- *       保证缓存不放大内存占用（缓存水位 ≈ 最近一次 free 潮峰值，而非累计）。
- *
- * 日志实测（1020.log）：稳态 free 潮每快照增量 mean≈1067、max=8701 个 span，
- * 加权平均 span 大小 17.1KB；潮集中在少数 arena，128KB/arena 预算可容纳
- * 32B 档 ~186 个或 4KB 档 ~1 个，足够覆盖单 arena 潮峰，全局水位远小于收益。
- */
+//	背景：整 span 回收时 clear() 把 mem 大切片丢给 GC（free 潮时一次上万块），
+//	      随后的 malloc 潮又重新 make 同样大小的切片，GC 双重负担。
+//	方案：整 span 回收时不丢 mem，入 arena 级复用链；malloc 新建分支优先从链里弹
+//	      一个现成 span（免 make、免逐槽位 magic 初始化）。
+//	容量：按字节预算限制（s4SpanCacheBytes），超预算的 span 退回 clear() 丢给 GC，
+//	      保证缓存不放大内存占用（缓存水位 ≈ 最近一次 free 潮峰值，而非累计）。
+//
+//	日志实测（1020.log）：稳态 free 潮每快照增量 mean≈1067、max=8701 个 span，
+//	加权平均 span 大小 17.1KB；潮集中在少数 arena，128KB/arena 预算可容纳
+//	32B 档 ~186 个或 4KB 档 ~1 个，足够覆盖单 arena 潮峰，全局水位远小于收益。
 const s4SpanCacheBytes = 128 * 1024
 
 // s4SpanCacheOn 复用链开关（true=启用缓存）
@@ -67,6 +59,7 @@ func s4SpanRecycle(list *[]span, s *span, spanBytes int) bool {
 		return false
 	}
 	s.objectNum = 0
+	s4SpanInit(s)             // 10.21新增：入链前重置代际计数，复用后的 span 统计从零开始（否则混住度翻新率会跨代累计失真）
 	s.objects = s.objects[:0] // 游标归零，底层数组保留
 	*list = append(*list, *s) // 结构体值拷贝入链，mem 指针随行
 	atomic.AddUint64(&s4SpanCacheStats.entry, 1)
@@ -111,37 +104,6 @@ func s4SpanCacheDrop(n int) {
 	}
 }
 
-// s4SpanFragSample free 时刻对 span 做碎片采样：按空槽率分桶累计（碎片度量）
-// 桶: 0:<25%, 1:<50%, 2:<75%, 3:<100%(有在用对象), 4: 全空(本可回收但走不到这)
-var s4FragBuckets [4]uint64
-
-// s4SpanFragSample 计算 span 当前空槽占比并计入分桶
-func s4SpanFragSample(s *span) {
-	total := int(s.spanSize)
-	if total <= 0 {
-		return
-	}
-	inUse := int(s.objectNum)
-	if inUse < 0 || inUse > total { // 防御：计数异常时跳过采样
-		return
-	}
-	emptyRatio := (total - inUse) * 4 / total // 0..3
-	if emptyRatio > 3 {
-		emptyRatio = 3
-	}
-	atomic.AddUint64(&s4FragBuckets[emptyRatio], 1)
-}
-
-// s4FragSnapshot 返回当前碎片分桶快照（gc-snapshot 聚合段用）
-func s4FragSnapshot() [4]uint64 {
-	return [4]uint64{
-		atomic.LoadUint64(&s4FragBuckets[0]),
-		atomic.LoadUint64(&s4FragBuckets[1]),
-		atomic.LoadUint64(&s4FragBuckets[2]),
-		atomic.LoadUint64(&s4FragBuckets[3]),
-	}
-}
-
 /* ============================ span 统计（写路径） ============================ */
 
 // s4SpanInit 重置 span 统计计数（initSpan 时调用）
@@ -151,6 +113,7 @@ func s4SpanInit(s *span) {
 }
 
 // s4SpanMalloc span 每分配一个对象，累计分配数 +1（malloc 时调用）
+// 10.23 note: 原混住度 refill 检测已随 [GC.Mix] 统计一并移除，仅保留纯计数
 func s4SpanMalloc(s *span) {
 	atomic.AddUint64(&s.objAllocNum, 1)
 }

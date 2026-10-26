@@ -921,16 +921,14 @@ func (a *arena) malloc(size uint32) uintptr {
 	if atomic.LoadUint32(&a.spanNum) == 0 || s.full() { // no span or all spans full, new one
 		idx := a.getSpanIdx()
 		s = &a.spans[idx]
-		if !s4SpanReuse(&a.freeSpans, s) { // 10.21改动了span获取策略：优先从freeSpan复用链取（方案B），免make免GC
-			s.initSpan(idx, a.spanSize, a.objectSize)
-			s4ArenaSpanAlloc(a)
-		}
+		s.initSpan(idx, a.spanSize, a.objectSize) // 10.21方案B（freeSpan复用链）暂不启用，先原版行为采集混住数据
+		s4ArenaSpanAlloc(a)
 		atomic.AddUint32(&a.spanNum, 1)
 		a.toHead(s)
 	}
 
 	ptr := s.malloc()
-	if !s4SpanIsolation && s.full() && !s.Next(a).full() { // 10.21改动了槽位分配策略：隔离模式跳过toTail，顺序填满span再开新span（方案A）
+	if s.full() && !s.Next(a).full() {
 		a.toTail(s)
 	}
 	setPtrSpanIdx(ptr, s.idx)
@@ -1051,15 +1049,12 @@ func (a *arena) free(ptr uintptr) {
 	if s.free(ptr) {
 		a.remove(s)
 		s4ArenaSpanFree(a)
-		if !s4SpanRecycle(&a.freeSpans, s, int(a.spanSize)*(int(a.objectSize)+reservedLen)) { // 10.21改动了span回收策略：整span入freeSpan复用链保留mem（方案B），预算满才丢给GC
-			s.clear()
-		}
+		s.clear() // 10.21方案B（freeSpan复用链）暂不启用，恢复原版clear丢给GC
 		a.idxPool = append(a.idxPool, idx)
 		atomic.AddUint32(&a.spanNum, ^uint32(0))
 	} else {
 		s4ArenaObjRetain(a)
-		s4SpanFragSample(s)                                        // 10.21新增碎片度量：记录free时刻span空槽率分布
-		if !s4SpanIsolation && atomic.LoadUint32(&a.spanNum) > 1 { // 10.21改动了回收排序策略：隔离模式跳过move，避免半空span被拉到head被新会话填充（方案A）
+		if atomic.LoadUint32(&a.spanNum) > 1 {
 			a.move(s)
 		}
 	}

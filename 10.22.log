@@ -1,0 +1,443 @@
+[] ===== GC aggregate =====
+Oct 22 07:02:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Heap] HeapAlloc: 7844932072, HeapInuse: 9199837184, HeapObjects: 32028701, NumGC: 3
+Oct 22 07:02:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Mem] Sys: 11682274467, RSS: 158212096
+Oct 22 07:02:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Total] Pools: 58822, PoolBytes: 23834304 (inUse 16934992 + empty 6899312 + OB 0), InUsed: 302274, mallocSpan: 17041, freeSpan: 0
+Oct 22 07:02:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=32, mallocSpan=5001, freeSpan=0
+Oct 22 07:02:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=64, mallocSpan=11210, freeSpan=0
+Oct 22 07:02:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=128, mallocSpan=45, freeSpan=0
+Oct 22 07:02:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=512, mallocSpan=785, freeSpan=0
+Oct 22 07:02:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Frag] empty<25%: 0, <50%: 0, <75%: 0, <100%: 0
+Oct 22 07:02:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.SpanCache] hit: 0, evict: 0, cached: 0
+Oct 22 07:02:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Mix] refill: 0, recycled 1x: 0, 2x: 0, 4x: 0, >4x: 0
+Oct 22 07:02:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Pool.Top] ADDRLACGROUP::internal, ADDRLACID::internal, ADDRN2TACID::internal
+Oct 22 07:02:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: ===============================
+ [] ===== GC aggregate =====
+Oct 22 07:04:45 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Heap] HeapAlloc: 3641588120, HeapInuse: 5799878656, HeapObjects: 9165490, NumGC: 5
+Oct 22 07:04:45 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Mem] Sys: 11689483427, RSS: 170987520
+Oct 22 07:04:45 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Total] Pools: 58822, PoolBytes: 23834304 (inUse 16934992 + empty 6899312 + OB 0), InUsed: 302294, mallocSpan: 17041, freeSpan: 0
+Oct 22 07:04:45 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=32, mallocSpan=5001, freeSpan=0
+Oct 22 07:04:45 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=64, mallocSpan=11210, freeSpan=0
+Oct 22 07:04:45 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=128, mallocSpan=45, freeSpan=0
+Oct 22 07:04:45 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=512, mallocSpan=785, freeSpan=0
+Oct 22 07:04:45 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Frag] empty<25%: 0, <50%: 0, <75%: 0, <100%: 0
+Oct 22 07:04:45 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.SpanCache] hit: 0, evict: 0, cached: 0
+Oct 22 07:04:45 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Mix] refill: 0, recycled 1x: 0, 2x: 0, 4x: 0, >4x: 0
+Oct 22 07:04:45 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Pool.Top] ADDRLACGROUP::internal, ADDRLACID::internal, ADDRN2TACID::internal
+Oct 22 07:04:45 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: ===============================
+ [] ===== GC aggregate =====
+Oct 22 07:14:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Heap] HeapAlloc: 17550077328, HeapInuse: 18050662400, HeapObjects: 146199595, NumGC: 9
+Oct 22 07:14:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Mem] Sys: 18561788803, RSS: 219992064
+Oct 22 07:14:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Total] Pools: 58822, PoolBytes: 1351099968 (inUse 1225493044 + empty 125606924 + OB 0), InUsed: 1703376, mallocSpan: 113771, freeSpan: 0
+Oct 22 07:14:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=32, mallocSpan=42254, freeSpan=0
+Oct 22 07:14:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=64, mallocSpan=35218, freeSpan=0
+Oct 22 07:14:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=128, mallocSpan=7213, freeSpan=0
+Oct 22 07:14:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=512, mallocSpan=4367, freeSpan=0
+Oct 22 07:14:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=2048, mallocSpan=3584, freeSpan=0
+Oct 22 07:14:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=2560, mallocSpan=3587, freeSpan=0
+Oct 22 07:14:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=3072, mallocSpan=7166, freeSpan=0
+Oct 22 07:14:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=4096, mallocSpan=6794, freeSpan=0
+Oct 22 07:14:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=6656, mallocSpan=3582, freeSpan=0
+Oct 22 07:14:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=20480, mallocSpan=6, freeSpan=0
+Oct 22 07:14:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Frag] empty<25%: 0, <50%: 0, <75%: 0, <100%: 0
+Oct 22 07:14:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.SpanCache] hit: 0, evict: 0, cached: 0
+Oct 22 07:14:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Mix] refill: 0, recycled 1x: 0, 2x: 0, 4x: 0, >4x: 0
+Oct 22 07:14:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Pool.Top] ADDRLACGROUP::internal, ADDRLACID::internal, ADDRN2TACID::internal
+Oct 22 07:14:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: ===============================
+[] ===== GC aggregate =====
+Oct 22 07:16:51 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Heap] HeapAlloc: 7091487240, HeapInuse: 12612812800, HeapObjects: 11027668, NumGC: 11
+Oct 22 07:16:51 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Mem] Sys: 19149081603, RSS: 266534912
+Oct 22 07:16:51 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Total] Pools: 58822, PoolBytes: 1902134720 (inUse 1773310200 + empty 128824520 + OB 0), InUsed: 2335786, mallocSpan: 154875, freeSpan: 0
+Oct 22 07:16:51 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=32, mallocSpan=58378, freeSpan=0
+Oct 22 07:16:51 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=64, mallocSpan=45487, freeSpan=0
+Oct 22 07:16:51 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=128, mallocSpan=10159, freeSpan=0
+Oct 22 07:16:51 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=512, mallocSpan=5842, freeSpan=0
+Oct 22 07:16:51 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=2048, mallocSpan=5057, freeSpan=0
+Oct 22 07:16:51 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=2560, mallocSpan=5057, freeSpan=0
+Oct 22 07:16:51 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=3072, mallocSpan=10114, freeSpan=0
+Oct 22 07:16:51 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=4096, mallocSpan=9716, freeSpan=0
+Oct 22 07:16:51 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=6656, mallocSpan=5057, freeSpan=0
+Oct 22 07:16:51 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=20480, mallocSpan=8, freeSpan=0
+Oct 22 07:16:51 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Frag] empty<25%: 0, <50%: 0, <75%: 0, <100%: 0
+Oct 22 07:16:51 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.SpanCache] hit: 0, evict: 0, cached: 0
+Oct 22 07:16:51 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Mix] refill: 0, recycled 1x: 0, 2x: 0, 4x: 0, >4x: 0
+Oct 22 07:16:51 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Pool.Top] ADDRLACGROUP::internal, ADDRLACID::internal, ADDRN2TACID::internal
+Oct 22 07:16:51 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: ===============================
+[] ===== GC aggregate =====
+Oct 22 07:20:53 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Heap] HeapAlloc: 8754036432, HeapInuse: 14640898048, HeapObjects: 14044706, NumGC: 13
+Oct 22 07:20:53 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Mem] Sys: 24620185043, RSS: 294522880
+Oct 22 07:20:53 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Total] Pools: 58822, PoolBytes: 2979788608 (inUse 2792373572 + empty 187415036 + OB 0), InUsed: 3405836, mallocSpan: 226014, freeSpan: 0
+Oct 22 07:20:53 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=32, mallocSpan=85776, freeSpan=0
+Oct 22 07:20:53 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=64, mallocSpan=57692, freeSpan=0
+Oct 22 07:20:53 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=128, mallocSpan=16261, freeSpan=0
+Oct 22 07:20:53 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=512, mallocSpan=8892, freeSpan=0
+Oct 22 07:20:53 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=2048, mallocSpan=5057, freeSpan=0
+Oct 22 07:20:53 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=2560, mallocSpan=8457, freeSpan=0
+Oct 22 07:20:53 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=3072, mallocSpan=19616, freeSpan=0
+Oct 22 07:20:53 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=3584, mallocSpan=3400, freeSpan=0
+Oct 22 07:20:53 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=4096, mallocSpan=15798, freeSpan=0
+Oct 22 07:20:53 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=6656, mallocSpan=5057, freeSpan=0
+Oct 22 07:20:53 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=20480, mallocSpan=8, freeSpan=0
+Oct 22 07:20:53 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Frag] empty<25%: 0, <50%: 0, <75%: 0, <100%: 0
+Oct 22 07:20:53 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.SpanCache] hit: 0, evict: 0, cached: 0
+Oct 22 07:20:53 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Mix] refill: 0, recycled 1x: 0, 2x: 0, 4x: 0, >4x: 0
+Oct 22 07:20:53 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Pool.Top] ADDRLACGROUP::internal, ADDRLACID::internal, ADDRN2TACID::internal
+Oct 22 07:20:53 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: ===============================
+[] ===== GC aggregate =====
+Oct 22 07:24:56 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Heap] HeapAlloc: 9184821248, HeapInuse: 14185684992, HeapObjects: 13339495, NumGC: 15
+Oct 22 07:24:56 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Mem] Sys: 25899178755, RSS: 484073472
+Oct 22 07:24:56 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Total] Pools: 58822, PoolBytes: 3411874560 (inUse 2974833156 + empty 437041404 + OB 0), InUsed: 3585640, mallocSpan: 263543, freeSpan: 9427
+Oct 22 07:24:56 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=32, mallocSpan=100570, freeSpan=5327
+Oct 22 07:24:56 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=64, mallocSpan=64147, freeSpan=1148
+Oct 22 07:24:56 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=128, mallocSpan=19481, freeSpan=218
+Oct 22 07:24:56 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=512, mallocSpan=10503, freeSpan=109
+Oct 22 07:24:56 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=2048, mallocSpan=5057, freeSpan=0
+Oct 22 07:24:56 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=2560, mallocSpan=10114, freeSpan=437
+Oct 22 07:24:56 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=3072, mallocSpan=24493, freeSpan=655
+Oct 22 07:24:56 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=3584, mallocSpan=5057, freeSpan=437
+Oct 22 07:24:56 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=4096, mallocSpan=19056, freeSpan=1095
+Oct 22 07:24:56 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=6656, mallocSpan=5057, freeSpan=0
+Oct 22 07:24:56 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=20480, mallocSpan=8, freeSpan=1
+Oct 22 07:24:56 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Frag] empty<25%: 126974, <50%: 133310, <75%: 86069, <100%: 51845
+Oct 22 07:24:56 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.SpanCache] hit: 0, evict: 0, cached: 0
+Oct 22 07:24:56 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Mix] refill: 0, recycled 1x: 9476, 2x: 0, 4x: 0, >4x: 0
+Oct 22 07:24:56 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Pool.Top] TableLocalSession:Sm5GCmDs455:record, TableLocalSession:Sm5GCmDs1030:record, TableLocalSession:Sm5GCmDs1283:record
+Oct 22 07:24:56 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: ===============================
+ [] ===== GC aggregate =====
+Oct 22 07:28:58 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Heap] HeapAlloc: 9239311032, HeapInuse: 13433659392, HeapObjects: 11506872, NumGC: 17
+Oct 22 07:28:58 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Mem] Sys: 25899440899, RSS: 340611072
+Oct 22 07:28:58 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Total] Pools: 58822, PoolBytes: 3458239264 (inUse 2959345692 + empty 498893572 + OB 0), InUsed: 3516870, mallocSpan: 265493, freeSpan: 14240
+Oct 22 07:28:58 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=32, mallocSpan=100570, freeSpan=6899
+Oct 22 07:28:58 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=64, mallocSpan=64147, freeSpan=2164
+Oct 22 07:28:58 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=128, mallocSpan=19481, freeSpan=272
+Oct 22 07:28:58 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=512, mallocSpan=10503, freeSpan=136
+Oct 22 07:28:58 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=2048, mallocSpan=5057, freeSpan=27
+Oct 22 07:28:58 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=2560, mallocSpan=10114, freeSpan=464
+Oct 22 07:28:58 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=3072, mallocSpan=24493, freeSpan=709
+Oct 22 07:28:58 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=3584, mallocSpan=5088, freeSpan=647
+Oct 22 07:28:58 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=4096, mallocSpan=19057, freeSpan=2893
+Oct 22 07:28:58 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=6656, mallocSpan=5058, freeSpan=27
+Oct 22 07:28:58 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=8192, mallocSpan=1916, freeSpan=0
+Oct 22 07:28:58 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=20480, mallocSpan=8, freeSpan=2
+Oct 22 07:28:58 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=32768, mallocSpan=1, freeSpan=0
+Oct 22 07:28:58 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Frag] empty<25%: 164032, <50%: 161125, <75%: 117436, <100%: 71956
+Oct 22 07:28:58 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.SpanCache] hit: 0, evict: 0, cached: 0
+Oct 22 07:28:58 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Mix] refill: 30380, recycled 1x: 14240, 2x: 0, 4x: 0, >4x: 0
+Oct 22 07:28:58 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Pool.Top] TableLocalSession:Sm5GCmDs455:record, TableLocalSession:Sm5GCmDs1237:record, TableLocalSession:Sm5GCmDs1358:record
+Oct 22 07:28:58 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: ===============================
+[] ===== GC aggregate =====
+Oct 22 07:33:01 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Heap] HeapAlloc: 10258421928, HeapInuse: 17627947008, HeapObjects: 20336505, NumGC: 19
+Oct 22 07:33:01 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Mem] Sys: 26140371779, RSS: 973942784
+Oct 22 07:33:01 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Total] Pools: 58822, PoolBytes: 3515052896 (inUse 3012602832 + empty 502450064 + OB 0), InUsed: 3543558, mallocSpan: 267440, freeSpan: 16633
+Oct 22 07:33:01 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=32, mallocSpan=100632, freeSpan=7262
+Oct 22 07:33:01 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=64, mallocSpan=64152, freeSpan=2397
+Oct 22 07:33:01 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=128, mallocSpan=19481, freeSpan=316
+Oct 22 07:33:01 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=512, mallocSpan=10503, freeSpan=158
+Oct 22 07:33:01 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=2048, mallocSpan=5058, freeSpan=46
+Oct 22 07:33:01 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=2560, mallocSpan=10123, freeSpan=487
+Oct 22 07:33:01 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=3072, mallocSpan=24501, freeSpan=757
+Oct 22 07:33:01 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=3584, mallocSpan=5117, freeSpan=660
+Oct 22 07:33:01 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=4096, mallocSpan=19060, freeSpan=4360
+Oct 22 07:33:01 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=6656, mallocSpan=5060, freeSpan=78
+Oct 22 07:33:01 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=8192, mallocSpan=3740, freeSpan=106
+Oct 22 07:33:01 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=20480, mallocSpan=8, freeSpan=6
+Oct 22 07:33:01 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=32768, mallocSpan=5, freeSpan=0
+Oct 22 07:33:01 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Frag] empty<25%: 262868, <50%: 179978, <75%: 132854, <100%: 83489
+Oct 22 07:33:01 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.SpanCache] hit: 0, evict: 0, cached: 0
+Oct 22 07:33:01 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Mix] refill: 150043, recycled 1x: 16523, 2x: 111, 4x: 0, >4x: 0
+Oct 22 07:33:01 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Pool.Top] TableLocalSession:Sm5GCmDs455:record, TableLocalSession:Sm5GCmDs1475:record, TableLocalSession:Sm5GCmDs1237:record
+Oct 22 07:33:01 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: ===============================
+[] ===== GC aggregate =====
+Oct 22 07:34:02 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Heap] HeapAlloc: 10349534776, HeapInuse: 18467487744, HeapObjects: 20958502, NumGC: 20
+Oct 22 07:34:02 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Mem] Sys: 26371526515, RSS: 1202368512
+Oct 22 07:34:02 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Total] Pools: 58822, PoolBytes: 3508102019 (inUse 3012645612 + empty 495456404 + OB 3), InUsed: 3542039, mallocSpan: 267857, freeSpan: 17299
+Oct 22 07:34:02 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=32, mallocSpan=100773, freeSpan=7405
+Oct 22 07:34:02 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=64, mallocSpan=64170, freeSpan=2468
+Oct 22 07:34:02 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=128, mallocSpan=19483, freeSpan=346
+Oct 22 07:34:02 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=512, mallocSpan=10504, freeSpan=173
+Oct 22 07:34:02 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=2048, mallocSpan=5062, freeSpan=58
+Oct 22 07:34:02 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=2560, mallocSpan=10140, freeSpan=501
+Oct 22 07:34:02 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=3072, mallocSpan=24516, freeSpan=789
+Oct 22 07:34:02 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=3584, mallocSpan=5141, freeSpan=670
+Oct 22 07:34:02 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=4096, mallocSpan=19076, freeSpan=4550
+Oct 22 07:34:02 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=6656, mallocSpan=5065, freeSpan=134
+Oct 22 07:34:02 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=8192, mallocSpan=3914, freeSpan=195
+Oct 22 07:34:02 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=20480, mallocSpan=8, freeSpan=7
+Oct 22 07:34:02 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=32768, mallocSpan=5, freeSpan=3
+Oct 22 07:34:02 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Frag] empty<25%: 343975, <50%: 198426, <75%: 143277, <100%: 90514
+Oct 22 07:34:02 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.SpanCache] hit: 0, evict: 0, cached: 0
+Oct 22 07:34:02 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Mix] refill: 257059, recycled 1x: 17087, 2x: 214, 4x: 0, >4x: 0
+Oct 22 07:34:02 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Pool.Top] TableLocalSession:Sm5GCmDs1475:record, TableLocalSession:Sm5GCmDs1290:record, TableLocalSession:Sm5GCmDs971:record
+Oct 22 07:34:02 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: ===============================
+ [] ===== GC aggregate =====
+Oct 22 07:35:59 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Heap] HeapAlloc: 10255065264, HeapInuse: 19039092736, HeapObjects: 20141459, NumGC: 22
+Oct 22 07:35:59 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Mem] Sys: 26375130995, RSS: 1159630848
+Oct 22 07:35:59 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Total] Pools: 58822, PoolBytes: 3507708290 (inUse 3014318316 + empty 493389972 + OB 2), InUsed: 3555127, mallocSpan: 268490, freeSpan: 17764
+Oct 22 07:35:59 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=32, mallocSpan=101052, freeSpan=7491
+Oct 22 07:35:59 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=64, mallocSpan=64216, freeSpan=2504
+Oct 22 07:35:59 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=128, mallocSpan=19489, freeSpan=358
+Oct 22 07:35:59 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=512, mallocSpan=10507, freeSpan=179
+Oct 22 07:35:59 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=2048, mallocSpan=5070, freeSpan=63
+Oct 22 07:35:59 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=2560, mallocSpan=10155, freeSpan=509
+Oct 22 07:35:59 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=3072, mallocSpan=24529, freeSpan=804
+Oct 22 07:35:59 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=3584, mallocSpan=5173, freeSpan=677
+Oct 22 07:35:59 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=4096, mallocSpan=19115, freeSpan=4688
+Oct 22 07:35:59 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=6656, mallocSpan=5081, freeSpan=193
+Oct 22 07:35:59 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=8192, mallocSpan=4087, freeSpan=286
+Oct 22 07:35:59 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=12288, mallocSpan=1, freeSpan=1
+Oct 22 07:35:59 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=16384, mallocSpan=1, freeSpan=0
+Oct 22 07:35:59 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=20480, mallocSpan=8, freeSpan=8
+Oct 22 07:35:59 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=32768, mallocSpan=6, freeSpan=3
+Oct 22 07:35:59 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Frag] empty<25%: 519019, <50%: 231768, <75%: 153417, <100%: 94606
+Oct 22 07:35:59 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.SpanCache] hit: 0, evict: 0, cached: 0
+Oct 22 07:35:59 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Mix] refill: 469114, recycled 1x: 17444, 2x: 320, 4x: 0, >4x: 0
+Oct 22 07:35:59 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Pool.Top] TableLocalSession:Sm5GCmDs1290:record, TableLocalSession:Sm5GCmDs1475:record, TableLocalSession:Sm5GCmDs971:record
+Oct 22 07:35:59 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: ===============================
+ [] ===== GC aggregate =====
+Oct 22 07:37:03 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Heap] HeapAlloc: 10226679976, HeapInuse: 19338674176, HeapObjects: 20207694, NumGC: 23
+Oct 22 07:37:03 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Mem] Sys: 26375655283, RSS: 1137684480
+Oct 22 07:37:03 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Total] Pools: 58822, PoolBytes: 3511432451 (inUse 3015543356 + empty 495889092 + OB 3), InUsed: 3554823, mallocSpan: 268798, freeSpan: 17941
+Oct 22 07:37:03 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=32, mallocSpan=101169, freeSpan=7526
+Oct 22 07:37:03 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=64, mallocSpan=64239, freeSpan=2522
+Oct 22 07:37:03 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=128, mallocSpan=19489, freeSpan=362
+Oct 22 07:37:03 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=512, mallocSpan=10507, freeSpan=181
+Oct 22 07:37:03 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=2048, mallocSpan=5071, freeSpan=64
+Oct 22 07:37:03 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=2560, mallocSpan=10167, freeSpan=512
+Oct 22 07:37:03 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=3072, mallocSpan=24540, freeSpan=810
+Oct 22 07:37:03 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=3584, mallocSpan=5190, freeSpan=680
+Oct 22 07:37:03 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=4096, mallocSpan=19138, freeSpan=4736
+Oct 22 07:37:03 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=6656, mallocSpan=5097, freeSpan=205
+Oct 22 07:37:03 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=8192, mallocSpan=4174, freeSpan=330
+Oct 22 07:37:03 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=12288, mallocSpan=2, freeSpan=1
+Oct 22 07:37:03 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=16384, mallocSpan=1, freeSpan=0
+Oct 22 07:37:03 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=20480, mallocSpan=8, freeSpan=8
+Oct 22 07:37:03 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=32768, mallocSpan=6, freeSpan=4
+Oct 22 07:37:03 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Frag] empty<25%: 611925, <50%: 252157, <75%: 158860, <100%: 96643
+Oct 22 07:37:03 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.SpanCache] hit: 0, evict: 0, cached: 0
+Oct 22 07:37:03 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Mix] refill: 586886, recycled 1x: 17598, 2x: 344, 4x: 0, >4x: 0
+Oct 22 07:37:03 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Pool.Top] TableLocalSession:Sm5GCmDs421:record, TableLocalSession:Sm5GCmDs1290:record, TableLocalSession:Sm5GCmDs1475:record
+Oct 22 07:37:03 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: ===============================
+[] ===== GC aggregate =====
+Oct 22 07:40:18 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Heap] HeapAlloc: 10268374552, HeapInuse: 19858710528, HeapObjects: 19981304, NumGC: 26
+Oct 22 07:40:18 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Mem] Sys: 26376245107, RSS: 1156509696
+Oct 22 07:40:18 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Total] Pools: 58822, PoolBytes: 3517413315 (inUse 3017043356 + empty 500369956 + OB 3), InUsed: 3554766, mallocSpan: 269567, freeSpan: 18375
+Oct 22 07:40:18 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=32, mallocSpan=101524, freeSpan=7633
+Oct 22 07:40:18 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=64, mallocSpan=64312, freeSpan=2573
+Oct 22 07:40:18 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=128, mallocSpan=19497, freeSpan=376
+Oct 22 07:40:18 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=512, mallocSpan=10511, freeSpan=188
+Oct 22 07:40:18 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=2048, mallocSpan=5080, freeSpan=71
+Oct 22 07:40:18 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=2560, mallocSpan=10189, freeSpan=527
+Oct 22 07:40:18 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=3072, mallocSpan=24561, freeSpan=832
+Oct 22 07:40:18 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=3584, mallocSpan=5219, freeSpan=688
+Oct 22 07:40:18 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=4096, mallocSpan=19211, freeSpan=4843
+Oct 22 07:40:18 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=6656, mallocSpan=5111, freeSpan=218
+Oct 22 07:40:18 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=8192, mallocSpan=4333, freeSpan=412
+Oct 22 07:40:18 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=12288, mallocSpan=2, freeSpan=2
+Oct 22 07:40:18 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=16384, mallocSpan=1, freeSpan=0
+Oct 22 07:40:18 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=20480, mallocSpan=9, freeSpan=8
+Oct 22 07:40:18 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=24576, mallocSpan=1, freeSpan=0
+Oct 22 07:40:18 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=32768, mallocSpan=6, freeSpan=4
+Oct 22 07:40:18 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Frag] empty<25%: 897577, <50%: 316995, <75%: 175060, <100%: 102031
+Oct 22 07:40:18 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.SpanCache] hit: 0, evict: 0, cached: 0
+Oct 22 07:40:18 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Mix] refill: 950597, recycled 1x: 17972, 2x: 392, 4x: 11, >4x: 1
+Oct 22 07:40:18 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Pool.Top] TableLocalSession:Sm5GCmDs1290:record, TableLocalSession:Sm5GCmDs421:record, TableLocalSession:Sm5GCmDs971:record
+Oct 22 07:40:18 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: ===============================
+[] ===== GC aggregate =====
+Oct 22 07:45:37 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Heap] HeapAlloc: 10294544456, HeapInuse: 20424695808, HeapObjects: 20571906, NumGC: 31
+Oct 22 07:45:37 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Mem] Sys: 26451811203, RSS: 1124663296
+Oct 22 07:45:37 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Total] Pools: 58822, PoolBytes: 3529118979 (inUse 3022498476 + empty 506620500 + OB 3), InUsed: 3572125, mallocSpan: 270634, freeSpan: 18986
+Oct 22 07:45:37 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=32, mallocSpan=101955, freeSpan=7792
+Oct 22 07:45:37 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=64, mallocSpan=64415, freeSpan=2645
+Oct 22 07:45:37 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=128, mallocSpan=19511, freeSpan=400
+Oct 22 07:45:37 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=512, mallocSpan=10518, freeSpan=200
+Oct 22 07:45:37 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=2048, mallocSpan=5088, freeSpan=80
+Oct 22 07:45:37 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=2560, mallocSpan=10223, freeSpan=541
+Oct 22 07:45:37 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=3072, mallocSpan=24601, freeSpan=861
+Oct 22 07:45:37 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=3584, mallocSpan=5259, freeSpan=702
+Oct 22 07:45:37 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=4096, mallocSpan=19320, freeSpan=4977
+Oct 22 07:45:37 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=6656, mallocSpan=5139, freeSpan=232
+Oct 22 07:45:37 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=8192, mallocSpan=4577, freeSpan=534
+Oct 22 07:45:37 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=12288, mallocSpan=5, freeSpan=5
+Oct 22 07:45:37 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=16384, mallocSpan=4, freeSpan=2
+Oct 22 07:45:37 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=20480, mallocSpan=11, freeSpan=9
+Oct 22 07:45:37 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=24576, mallocSpan=2, freeSpan=1
+Oct 22 07:45:37 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=32768, mallocSpan=6, freeSpan=5
+Oct 22 07:45:37 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Frag] empty<25%: 1359635, <50%: 426200, <75%: 199851, <100%: 109469
+Oct 22 07:45:37 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.SpanCache] hit: 0, evict: 0, cached: 0
+Oct 22 07:45:37 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Mix] refill: 1548346, recycled 1x: 18456, 2x: 490, 4x: 30, >4x: 10
+Oct 22 07:45:37 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Pool.Top] TableLocalSession:Sm5GCmDs1290:record, TableLocalSession:Sm5GCmDs1475:record, TableLocalSession:Sm5GCmDs104:record
+Oct 22 07:45:37 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: ===============================
+[] ===== GC aggregate =====
+Oct 22 07:47:39 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Heap] HeapAlloc: 12126971512, HeapInuse: 21880774656, HeapObjects: 32990916, NumGC: 33
+Oct 22 07:47:39 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Mem] Sys: 26797660115, RSS: 1614659584
+Oct 22 07:47:39 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Total] Pools: 58822, PoolBytes: 3524078595 (inUse 2903785880 + empty 620292712 + OB 3), InUsed: 3441948, mallocSpan: 271045, freeSpan: 19995
+Oct 22 07:47:39 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=32, mallocSpan=102127, freeSpan=8128
+Oct 22 07:47:39 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=64, mallocSpan=64470, freeSpan=2810
+Oct 22 07:47:39 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=128, mallocSpan=19521, freeSpan=549
+Oct 22 07:47:39 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=512, mallocSpan=10523, freeSpan=281
+Oct 22 07:47:39 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=2048, mallocSpan=5090, freeSpan=115
+Oct 22 07:47:39 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=2560, mallocSpan=10236, freeSpan=569
+Oct 22 07:47:39 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=3072, mallocSpan=24622, freeSpan=1010
+Oct 22 07:47:39 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=3584, mallocSpan=5280, freeSpan=706
+Oct 22 07:47:39 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=4096, mallocSpan=19352, freeSpan=4999
+Oct 22 07:47:39 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=6656, mallocSpan=5145, freeSpan=232
+Oct 22 07:47:39 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=8192, mallocSpan=4649, freeSpan=572
+Oct 22 07:47:39 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=12288, mallocSpan=6, freeSpan=5
+Oct 22 07:47:39 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=16384, mallocSpan=4, freeSpan=2
+Oct 22 07:47:39 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=20480, mallocSpan=11, freeSpan=10
+Oct 22 07:47:39 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=24576, mallocSpan=2, freeSpan=2
+Oct 22 07:47:39 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=32768, mallocSpan=7, freeSpan=5
+Oct 22 07:47:39 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Frag] empty<25%: 1602901, <50%: 520205, <75%: 226646, <100%: 119261
+Oct 22 07:47:39 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.SpanCache] hit: 0, evict: 0, cached: 0
+Oct 22 07:47:39 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Mix] refill: 1773163, recycled 1x: 19478, 2x: 543, 4x: 33, >4x: 10
+Oct 22 07:47:39 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Pool.Top] TableLocalSession:Sm5GCmDs1290:record, TableLocalSession:Sm5GCmDs104:record, TableLocalSession:Sm5GCmDs1475:record
+Oct 22 07:47:39 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: ===============================
+[] ===== GC aggregate =====
+Oct 22 07:48:08 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Heap] HeapAlloc: 12398828160, HeapInuse: 21776162816, HeapObjects: 36771675, NumGC: 34
+Oct 22 07:48:08 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Mem] Sys: 27320662099, RSS: 2022146048
+Oct 22 07:48:08 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Total] Pools: 58822, PoolBytes: 3504428195 (inUse 2268046604 + empty 1236381588 + OB 3), InUsed: 2807737, mallocSpan: 271051, freeSpan: 22030
+Oct 22 07:48:08 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=32, mallocSpan=102127, freeSpan=9380
+Oct 22 07:48:08 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=64, mallocSpan=64470, freeSpan=3031
+Oct 22 07:48:08 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=128, mallocSpan=19521, freeSpan=665
+Oct 22 07:48:08 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=512, mallocSpan=10523, freeSpan=339
+Oct 22 07:48:08 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=2048, mallocSpan=5090, freeSpan=143
+Oct 22 07:48:08 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=2560, mallocSpan=10236, freeSpan=624
+Oct 22 07:48:08 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=3072, mallocSpan=24623, freeSpan=1156
+Oct 22 07:48:08 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=3584, mallocSpan=5283, freeSpan=712
+Oct 22 07:48:08 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=4096, mallocSpan=19353, freeSpan=5095
+Oct 22 07:48:08 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=6656, mallocSpan=5145, freeSpan=238
+Oct 22 07:48:08 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=8192, mallocSpan=4650, freeSpan=622
+Oct 22 07:48:08 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=12288, mallocSpan=6, freeSpan=5
+Oct 22 07:48:08 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=16384, mallocSpan=4, freeSpan=2
+Oct 22 07:48:08 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=20480, mallocSpan=11, freeSpan=10
+Oct 22 07:48:08 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=24576, mallocSpan=2, freeSpan=2
+Oct 22 07:48:08 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=32768, mallocSpan=7, freeSpan=6
+Oct 22 07:48:08 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Frag] empty<25%: 1905089, <50%: 779290, <75%: 324490, <100%: 144228
+Oct 22 07:48:08 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.SpanCache] hit: 0, evict: 0, cached: 0
+Oct 22 07:48:08 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Mix] refill: 1826011, recycled 1x: 20985, 2x: 979, 4x: 63, >4x: 18
+Oct 22 07:48:08 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Pool.Top] TableLocalSession:Sm5GCmDs104:record, TableLocalSession:Sm5GCmDs1290:record, TableLocalSession:Sm5GCmDs1475:record
+Oct 22 07:48:08 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: ===============================
+ [] ===== GC aggregate =====
+Oct 22 07:48:37 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Heap] HeapAlloc: 12048970056, HeapInuse: 21540724736, HeapObjects: 34961427, NumGC: 35
+Oct 22 07:48:37 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Mem] Sys: 27320924243, RSS: 1761091584
+Oct 22 07:48:37 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Total] Pools: 58822, PoolBytes: 3431039171 (inUse 1622257964 + empty 1808781204 + OB 3), InUsed: 2129267, mallocSpan: 271051, freeSpan: 27876
+Oct 22 07:48:37 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=32, mallocSpan=102127, freeSpan=12581
+Oct 22 07:48:37 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=64, mallocSpan=64470, freeSpan=3746
+Oct 22 07:48:37 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=128, mallocSpan=19521, freeSpan=1005
+Oct 22 07:48:37 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=512, mallocSpan=10523, freeSpan=528
+Oct 22 07:48:37 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=2048, mallocSpan=5090, freeSpan=247
+Oct 22 07:48:37 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=2560, mallocSpan=10236, freeSpan=797
+Oct 22 07:48:37 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=3072, mallocSpan=24623, freeSpan=1569
+Oct 22 07:48:37 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=3584, mallocSpan=5283, freeSpan=749
+Oct 22 07:48:37 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=4096, mallocSpan=19353, freeSpan=5501
+Oct 22 07:48:37 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=6656, mallocSpan=5145, freeSpan=329
+Oct 22 07:48:37 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=8192, mallocSpan=4650, freeSpan=798
+Oct 22 07:48:37 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=12288, mallocSpan=6, freeSpan=5
+Oct 22 07:48:37 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=16384, mallocSpan=4, freeSpan=2
+Oct 22 07:48:37 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=20480, mallocSpan=11, freeSpan=10
+Oct 22 07:48:37 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=24576, mallocSpan=2, freeSpan=2
+Oct 22 07:48:37 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=32768, mallocSpan=7, freeSpan=7
+Oct 22 07:48:37 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Frag] empty<25%: 2035453, <50%: 1058448, <75%: 548567, <100%: 225172
+Oct 22 07:48:37 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.SpanCache] hit: 0, evict: 0, cached: 0
+Oct 22 07:48:37 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Mix] refill: 1874396, recycled 1x: 24387, 2x: 3063, 4x: 375, >4x: 130
+Oct 22 07:48:37 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Pool.Top] TableLocalSession:Sm5GCmDs104:record, TableLocalSession:Sm5GCmDs971:record, TableLocalSession:Sm5GCmDs1290:record
+Oct 22 07:48:37 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: ===============================
+[] ===== GC aggregate =====
+Oct 22 07:49:07 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Heap] HeapAlloc: 11464859032, HeapInuse: 21211234304, HeapObjects: 34720624, NumGC: 36
+Oct 22 07:49:07 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Mem] Sys: 27320924243, RSS: 1941491712
+Oct 22 07:49:07 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Total] Pools: 58822, PoolBytes: 2932728898 (inUse 951926964 + empty 1980801932 + OB 2), InUsed: 1405111, mallocSpan: 271060, freeSpan: 61870
+Oct 22 07:49:07 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=32, mallocSpan=102127, freeSpan=27197
+Oct 22 07:49:07 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=64, mallocSpan=64470, freeSpan=9928
+Oct 22 07:49:07 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=128, mallocSpan=19521, freeSpan=3450
+Oct 22 07:49:07 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=512, mallocSpan=10523, freeSpan=1878
+Oct 22 07:49:07 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=2048, mallocSpan=5091, freeSpan=995
+Oct 22 07:49:07 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=2560, mallocSpan=10239, freeSpan=2020
+Oct 22 07:49:07 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=3072, mallocSpan=24625, freeSpan=4493
+Oct 22 07:49:07 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=3584, mallocSpan=5285, freeSpan=1250
+Oct 22 07:49:07 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=4096, mallocSpan=19353, freeSpan=7875
+Oct 22 07:49:07 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=6656, mallocSpan=5146, freeSpan=1080
+Oct 22 07:49:07 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=8192, mallocSpan=4650, freeSpan=1675
+Oct 22 07:49:07 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=12288, mallocSpan=6, freeSpan=6
+Oct 22 07:49:07 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=16384, mallocSpan=4, freeSpan=3
+Oct 22 07:49:07 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=20480, mallocSpan=11, freeSpan=11
+Oct 22 07:49:07 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=24576, mallocSpan=2, freeSpan=2
+Oct 22 07:49:07 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=32768, mallocSpan=7, freeSpan=7
+Oct 22 07:49:07 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Frag] empty<25%: 2085546, <50%: 1224552, <75%: 835609, <100%: 467444
+Oct 22 07:49:07 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.SpanCache] hit: 0, evict: 0, cached: 0
+Oct 22 07:49:07 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Mix] refill: 1925227, recycled 1x: 39417, 2x: 19219, 4x: 2874, >4x: 1144
+Oct 22 07:49:07 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Pool.Top] TableLocalSession:Sm5GCmDs1290:record, TableLocalSession:Sm5GCmDs104:record, TableLocalSession:Sm5GCmDs971:record
+Oct 22 07:49:07 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: ===============================
+[] ===== GC aggregate =====
+Oct 22 07:49:39 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Heap] HeapAlloc: 8515158936, HeapInuse: 18869567488, HeapObjects: 23202879, NumGC: 37
+Oct 22 07:49:39 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Mem] Sys: 27320924243, RSS: 1590202368
+Oct 22 07:49:39 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Total] Pools: 58822, PoolBytes: 1220135520 (inUse 236352604 + empty 983782916 + OB 0), InUsed: 581682, mallocSpan: 270636, freeSpan: 178061
+Oct 22 07:49:39 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=32, mallocSpan=101927, freeSpan=70165
+Oct 22 07:49:39 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=64, mallocSpan=64369, freeSpan=34962
+Oct 22 07:49:39 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=128, mallocSpan=19485, freeSpan=13455
+Oct 22 07:49:39 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=512, mallocSpan=10500, freeSpan=7430
+Oct 22 07:49:39 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=2048, mallocSpan=5085, freeSpan=3708
+Oct 22 07:49:39 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=2560, mallocSpan=10241, freeSpan=6849
+Oct 22 07:49:39 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=3072, mallocSpan=24594, freeSpan=16604
+Oct 22 07:49:39 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=3584, mallocSpan=5290, freeSpan=3332
+Oct 22 07:49:39 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=4096, mallocSpan=19327, freeSpan=14600
+Oct 22 07:49:39 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=6656, mallocSpan=5143, freeSpan=3007
+Oct 22 07:49:39 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=8192, mallocSpan=4645, freeSpan=3919
+Oct 22 07:49:39 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=12288, mallocSpan=6, freeSpan=6
+Oct 22 07:49:39 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=16384, mallocSpan=4, freeSpan=4
+Oct 22 07:49:39 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=20480, mallocSpan=11, freeSpan=11
+Oct 22 07:49:39 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=24576, mallocSpan=2, freeSpan=2
+Oct 22 07:49:39 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=32768, mallocSpan=7, freeSpan=7
+Oct 22 07:49:39 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Frag] empty<25%: 2106330, <50%: 1304521, <75%: 1051728, <100%: 882139
+Oct 22 07:49:39 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.SpanCache] hit: 0, evict: 0, cached: 0
+Oct 22 07:49:39 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Mix] refill: 1975290, recycled 1x: 84520, 2x: 79458, 4x: 10286, >4x: 4316
+Oct 22 07:49:39 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Pool.Top] TableLocalSession:Sm5GCmDs104:record, TableLocalSession:Sm5GCmDs1290:record, TableLocalSession:Sm5GCmDs1475:record
+Oct 22 07:49:39 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: ===============================
+[] ===== GC aggregate =====
+Oct 22 07:51:41 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Heap] HeapAlloc: 6886620840, HeapInuse: 16768737280, HeapObjects: 16943895, NumGC: 38
+Oct 22 07:51:41 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Mem] Sys: 27320924243, RSS: 1217769472
+Oct 22 07:51:41 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Total] Pools: 58822, PoolBytes: 667576800 (inUse 181775008 + empty 485801792 + OB 0), InUsed: 548647, mallocSpan: 270871, freeSpan: 208168
+Oct 22 07:51:41 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=32, mallocSpan=101882, freeSpan=80073
+Oct 22 07:51:41 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=64, mallocSpan=64359, freeSpan=41670
+Oct 22 07:51:41 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=128, mallocSpan=19475, freeSpan=16015
+Oct 22 07:51:41 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=512, mallocSpan=10498, freeSpan=8050
+Oct 22 07:51:41 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=2048, mallocSpan=5121, freeSpan=4118
+Oct 22 07:51:41 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=2560, mallocSpan=10347, freeSpan=8160
+Oct 22 07:51:41 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=3072, mallocSpan=24653, freeSpan=20035
+Oct 22 07:51:41 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=3584, mallocSpan=5358, freeSpan=4129
+Oct 22 07:51:41 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=4096, mallocSpan=19329, freeSpan=16985
+Oct 22 07:51:41 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=6656, mallocSpan=5178, freeSpan=4263
+Oct 22 07:51:41 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=8192, mallocSpan=4641, freeSpan=4640
+Oct 22 07:51:41 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=12288, mallocSpan=6, freeSpan=6
+Oct 22 07:51:41 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=16384, mallocSpan=4, freeSpan=4
+Oct 22 07:51:41 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=20480, mallocSpan=11, freeSpan=11
+Oct 22 07:51:41 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=24576, mallocSpan=2, freeSpan=2
+Oct 22 07:51:41 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=32768, mallocSpan=7, freeSpan=7
+Oct 22 07:51:41 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Frag] empty<25%: 2112089, <50%: 1318342, <75%: 1087374, <100%: 956077
+Oct 22 07:51:41 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.SpanCache] hit: 0, evict: 0, cached: 0
+Oct 22 07:51:41 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Mix] refill: 2108481, recycled 1x: 92322, 2x: 97704, 4x: 12816, >4x: 6111
+Oct 22 07:51:41 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Pool.Top] TableLocalSession:Sm5GCmDs104:record, TableLocalSession:Sm5GCmDs1290:record, TableLocalSession:Sm5GCmDs1475:record
+Oct 22 07:51:41 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: ===============================
+ [] ===== GC aggregate =====
+Oct 22 07:53:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Heap] HeapAlloc: 6490928144, HeapInuse: 15790923776, HeapObjects: 16058962, NumGC: 39
+Oct 22 07:53:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Mem] Sys: 27321186387, RSS: 1050451968
+Oct 22 07:53:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Total] Pools: 58822, PoolBytes: 607981120 (inUse 212269780 + empty 395711340 + OB 0), InUsed: 579747, mallocSpan: 270552, freeSpan: 213741
+Oct 22 07:53:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=32, mallocSpan=101610, freeSpan=82318
+Oct 22 07:53:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=64, mallocSpan=64276, freeSpan=43202
+Oct 22 07:53:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=128, mallocSpan=19470, freeSpan=16434
+Oct 22 07:53:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=512, mallocSpan=10468, freeSpan=8306
+Oct 22 07:53:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=2048, mallocSpan=5092, freeSpan=4234
+Oct 22 07:53:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=2560, mallocSpan=10344, freeSpan=8407
+Oct 22 07:53:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=3072, mallocSpan=24677, freeSpan=20474
+Oct 22 07:53:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=3584, mallocSpan=5387, freeSpan=4152
+Oct 22 07:53:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=4096, mallocSpan=19384, freeSpan=17161
+Oct 22 07:53:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=6656, mallocSpan=5179, freeSpan=4389
+Oct 22 07:53:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=8192, mallocSpan=4635, freeSpan=4634
+Oct 22 07:53:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=12288, mallocSpan=6, freeSpan=6
+Oct 22 07:53:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=16384, mallocSpan=4, freeSpan=4
+Oct 22 07:53:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=20480, mallocSpan=11, freeSpan=11
+Oct 22 07:53:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=24576, mallocSpan=2, freeSpan=2
+Oct 22 07:53:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Span] objectsize=32768, mallocSpan=7, freeSpan=7
+Oct 22 07:53:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Frag] empty<25%: 2130453, <50%: 1349717, <75%: 1119312, <100%: 975246
+Oct 22 07:53:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.SpanCache] hit: 0, evict: 0, cached: 0
+Oct 22 07:53:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Mix] refill: 2242843, recycled 1x: 92834, 2x: 103029, 4x: 13503, >4x: 6246
+Oct 22 07:53:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Pool.Top] TableLocalSession:Sm5GCmDs104:record, TableLocalSession:Sm5GCmDs1290:record, TableLocalSession:Sm5GCmDs1475:record
+Oct 22 07:53:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: ===============================
