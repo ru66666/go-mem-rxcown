@@ -346,6 +346,23 @@ func (l *sweepLocker) tryAcquire(s *mspan) (sweepLocked, bool) {
 	return sweepLocked{s}, true
 }
 
+// tryAcquireMfreeLarge attempts to acquire sweep ownership of a large span
+// for eager reclamation by MfreeObj（10.23/10.27，对齐 go1.24.2 参考实现）。
+// 与 tryAcquire 的区别：仅要求 sweepgen 为"当前代已清扫"（== sweepGen），
+// 因为 MfreeObj 大对象路径在 gcphase == _GCoff 时执行，此时该 span 的
+// sweepgen 已被正常 sweep 流程推进到当前代。
+func (l *sweepLocker) tryAcquireMfreeLarge(s *mspan) (sweepLocked, bool) {
+	// Check before attempting to CAS.
+	if atomic.Load(&s.sweepgen) != l.sweepGen {
+		return sweepLocked{}, false
+	}
+	// Attempt to acquire sweep ownership of s.
+	if !atomic.Cas(&s.sweepgen, l.sweepGen, l.sweepGen-1) {
+		return sweepLocked{}, false
+	}
+	return sweepLocked{s}, true
+}
+
 // sweepone sweeps some unswept heap span and returns the number of pages returned
 // to the heap, or ^uintptr(0) if there was nothing to sweep.
 func sweepone() uintptr {
@@ -372,7 +389,9 @@ func sweepone() uintptr {
 			noMoreWork = sweep.active.markDrained()
 			break
 		}
-		if state := s.state.get(); state != mSpanInUse {
+		// 10.23/10.27: 允许 Dangling（mfree 第二步清扫等待中的大对象 span）
+		// 进入正常清扫流程（对齐参考 :391）。
+		if state := s.state.get(); state != mSpanInUse && state != mSpanDangling {
 			// This can happen if direct sweeping already
 			// swept this span, but in that case the sweep
 			// generation should always be up-to-date.
@@ -510,7 +529,22 @@ func (sl *sweepLocked) sweep(preserve bool) bool {
 	}
 
 	sweepgen := mheap_.sweepgen
-	if state := s.state.get(); state != mSpanInUse || s.sweepgen != sweepgen-1 {
+	// 10.23/10.27: mfree 两步清扫状态标记（对齐 go1.24.2 参考实现 :529-533）。
+	isMspanTwoStepSweep := false
+	if s.state.get() == mSpanTwoStepSweep {
+		isMspanTwoStepSweep = true
+	}
+	if state := s.state.get(); state == mSpanDangling {
+		// We only need to free the mspan structure if we are doing the second step of two-step sweep
+		s.state.set(mSpanDead)
+		systemstack(func() {
+			lock(&mheap_.lock)
+			mheap_.freeMSpanLocked(s)
+			unlock(&mheap_.lock)
+		})
+		return false
+	}
+	if state := s.state.get(); !isMspanTwoStepSweep && (state != mSpanInUse || s.sweepgen != sweepgen-1) {
 		print("mspan.sweep: state=", state, " sweepgen=", s.sweepgen, " mheap.sweepgen=", sweepgen, "\n")
 		throw("mspan.sweep: bad span state")
 	}
@@ -640,6 +674,11 @@ func (sl *sweepLocked) sweep(preserve bool) bool {
 		}
 	}
 
+	// Writeback allocCache to sync mfree() modification
+	// 10.23/10.27: mfree 小对象路径直接翻 allocCache 位图，sweep 前
+	// 必须把缓存写回 allocBits（对齐 go1.24.2 参考实现 :671-672）。
+	s.writebackAllocCache()
+
 	// Check for zombie objects.
 	if s.freeindex < s.nelems {
 		// Everything < freeindex is allocated and hence
@@ -661,6 +700,10 @@ func (sl *sweepLocked) sweep(preserve bool) bool {
 
 	// Count the number of free objects in this span.
 	nalloc := uint16(s.countAlloc())
+	// 10.23/10.27: mfreed allocLarge spans are forced swept（对齐参考 :697-700）
+	if isMspanTwoStepSweep {
+		nalloc = 0
+	}
 	nfreed := s.allocCount - nalloc
 	if nalloc > s.allocCount {
 		// The zombie check above should have caught this in
@@ -691,7 +734,7 @@ func (sl *sweepLocked) sweep(preserve bool) bool {
 
 	// The span must be in our exclusive ownership until we update sweepgen,
 	// check for potential races.
-	if state := s.state.get(); state != mSpanInUse || s.sweepgen != sweepgen-1 {
+	if state := s.state.get(); !isMspanTwoStepSweep && (state != mSpanInUse || s.sweepgen != sweepgen-1) {
 		print("mspan.sweep: state=", state, " sweepgen=", s.sweepgen, " mheap.sweepgen=", sweepgen, "\n")
 		throw("mspan.sweep: bad span state after sweep")
 	}

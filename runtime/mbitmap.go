@@ -1104,6 +1104,40 @@ func (s *mspan) refillAllocCache(whichByte uint16) {
 	s.allocCache = ^aCache
 }
 
+// writebackAllocCache 把 mfree 直接修改的 allocCache 位图写回 allocBits
+// （10.23/10.27，对齐 go1.24.2 参考实现 :1058）：mfree 小对象路径翻的是
+// allocCache（64 位缓存），sweep/统计读的是 allocBits，写回保证两者一致。
+//
+//go:nosplit
+func (s *mspan) writebackAllocCache() {
+	allocCacheBaseByte := (uintptr(s.freeindex) &^ uintptr(64-1)) / 8
+
+	if allocCacheBaseByte<<3 == uintptr(s.nelems) {
+		// Don't writeback past-the-end allocCache
+		return
+	}
+
+	fullAllocCache := s.allocCache << (s.freeindex % 64)
+
+	bytes := (*[8]uint8)(unsafe.Pointer(s.allocBits.bytep(allocCacheBaseByte)))
+
+	bytes[0] = ^(uint8(fullAllocCache))
+	fullAllocCache >>= 8
+	bytes[1] = ^(uint8(fullAllocCache))
+	fullAllocCache >>= 8
+	bytes[2] = ^(uint8(fullAllocCache))
+	fullAllocCache >>= 8
+	bytes[3] = ^(uint8(fullAllocCache))
+	fullAllocCache >>= 8
+	bytes[4] = ^(uint8(fullAllocCache))
+	fullAllocCache >>= 8
+	bytes[5] = ^(uint8(fullAllocCache))
+	fullAllocCache >>= 8
+	bytes[6] = ^(uint8(fullAllocCache))
+	fullAllocCache >>= 8
+	bytes[7] = ^(uint8(fullAllocCache))
+}
+
 // nextFreeIndex returns the index of the next free object in s at
 // or after s.freeindex.
 // There are hardware instructions that can be used to make this

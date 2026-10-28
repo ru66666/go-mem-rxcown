@@ -263,6 +263,18 @@ func main() {
 	needUnlock = false
 	unlockOSThread()
 
+	// 10.23/10.27: mfree 统计激活（对齐 go1.24.2 参考 proc.go:264-274）。
+	// GODEBUG=runtimestat=1 开启统计；runtimehistogram=1 额外开启调用点直方图。
+	if debug.runtimestat > 0 {
+		initMFStatsGlobals()
+		EnableMfreeStats(true)
+		ClearMfreeStats()
+		if debug.runtimehistogram > 0 {
+			EnableMfreeStatsHistogram(true)
+			ClearMfreeHistogram()
+		}
+	}
+
 	if isarchive || islibrary {
 		// A program compiled with -buildmode=c-archive or c-shared
 		// has a main, but it is not executed.
@@ -311,6 +323,54 @@ func main() {
 	}
 }
 
+// 10.23/10.27: mfree 统计辅助（对齐 go1.24.2 参考 proc.go:329-528，见
+// malloc_mfree.go / mstats.go 的配套改动）。
+
+func PrintCEAAllocInfo() {
+	if debug.mfreetrace > 0 {
+		println("PrintCEAAllocInfo(): len(allgs):", len(allgs))
+		var sum allocOptInfo
+		sum.optNumPerHandler = make(map[int]uint)
+		for _, g := range allgs {
+			sum.toFreeNewObjNum += g.alloc_info.toFreeNewObjNum
+			sum.toFreeSliceNum += g.alloc_info.toFreeSliceNum
+			sum.toFreeMapNum += g.alloc_info.toFreeMapNum
+
+			sum.trueFreeNewObjNum += g.alloc_info.trueFreeNewObjNum
+			sum.trueFreeSliceNum += g.alloc_info.trueFreeSliceNum
+			sum.trueFreeMapNum += g.alloc_info.trueFreeMapNum
+
+			sum.totalNewObjNum += g.alloc_info.totalNewObjNum
+			sum.totalSliceNum += g.alloc_info.totalSliceNum
+			sum.totalMapNum += g.alloc_info.totalMapNum
+
+			for perHandlerFreeNum, count := range g.alloc_info.optNumPerHandler {
+				sum.optNumPerHandler[perHandlerFreeNum] += count
+			}
+		}
+		println("<newobjectNum> total:", sum.totalNewObjNum, ", to free:", sum.toFreeNewObjNum, ", true free:", sum.trueFreeNewObjNum)
+		println("<makesliceNum> total:", sum.totalSliceNum, ", to free:", sum.toFreeSliceNum, ", true free:", sum.trueFreeSliceNum)
+		println("<makemapNum> total:", sum.totalMapNum, ", to free:", sum.toFreeMapNum, ", true free:", sum.trueFreeMapNum)
+		for perHandlerFreeNum, count := range sum.optNumPerHandler {
+			println("Number of Handlers:", count, " freed:", perHandlerFreeNum)
+		}
+	}
+}
+
+func PrintRuntimeBenchmarkResults() {
+	if debug.runtimestat > 0 {
+		println("PrintRuntimeBenchmarkResults()")
+		extractResult().print()
+	}
+}
+
+func PrintRuntimeHistogramResults() {
+	if debug.runtimehistogram > 0 {
+		println("PrintRuntimeHistogramResults()")
+		printHistogram()
+	}
+}
+
 // os_beforeExit is called from os.Exit(0).
 //
 //go:linkname os_beforeExit os.runtime_beforeExit
@@ -320,6 +380,335 @@ func os_beforeExit(exitCode int) {
 		racefini()
 	}
 }
+
+func extractResult() benchmarkResult {
+	var memStats MemStats
+	ReadMemStats(&memStats)
+	mfreeStats := ReadMfreeStats()
+	return benchmarkResult{1, mfreeStats.Time, 0, mfreeStats.AllocCount, mfreeStats.AllocBytes,
+		uint64(memStats.NumGC), mfreeStats.MfreeCount, mfreeStats.MfreeBytes, mfreeStats.MfreeBytesCat[1], mfreeStats.MfreeBytesCat[2],
+		mfreeStats.MfreeBytesCat[3], mfreeStats.MaxHeapInUse, mfreeStats.AvgHeapInUse, mfreeStats.ceaAllocRecord, nil}
+}
+
+func printHistogram() {
+	// Merge histogram
+
+	for m := 0; m < GMPMAX; m++ {
+		for i := uint64(0); i < HistogramLen[m]; i++ {
+			item := Histogram[m][i]
+
+			j := uint64(0)
+			for ; j < HistogramLen[GMPMAX]; j++ {
+				if Histogram[GMPMAX][j].programPoint == item.programPoint {
+					break
+				}
+			}
+			if j == HistogramLen[GMPMAX] {
+				Histogram[GMPMAX][j] = item
+				HistogramLen[GMPMAX]++
+			} else {
+				Histogram[GMPMAX][j].tries += item.tries
+				Histogram[GMPMAX][j].size += item.size
+				for k := 0; k < MfreeResultCodeEnd; k++ {
+					Histogram[GMPMAX][j].results[k] += item.results[k]
+				}
+			}
+		}
+	}
+
+	print("programPoint,category,tries,Success,GcRunning,OnStack,Tiny,HaveSpecial,NotInMcache,NotInAllocCache,AlreadyMfreed,LargeNotInUse,FailedToLockLarge,size\n")
+	for i := uint64(0); i < HistogramLen[GMPMAX]; i++ {
+		item := Histogram[GMPMAX][i]
+		print(item.programPoint)
+		print(",")
+		print(item.category)
+		print(",")
+		print(item.tries)
+		print(",")
+		for j := 0; j < MfreeResultCodeEnd; j++ {
+			print(item.results[j])
+			print(",")
+		}
+		print(item.size)
+		print("\n")
+	}
+}
+
+// BenchmarkResult contains the results of a benchmark run.
+type benchmarkResult struct {
+	N                 int    // The number of iterations.
+	T                 uint64 // The total time taken.
+	Bytes             int64  // Bytes processed in one iteration.
+	MemAllocs         uint64 // The total number of memory allocations.
+	MemBytes          uint64 // The total number of bytes allocated.
+	MemGc             uint64
+	Mfrees            uint64
+	MfreeBytes        uint64
+	MfreeBytesSlice   uint64
+	MfreeBytesMapDie  uint64
+	MfreeBytesMapGrow uint64
+	MaxHeapInUse      uint64
+	AvgHeapInUse      uint64
+	allocStats        allocOptInfo
+
+	// Extra records additional metrics reported by ReportMetric.
+	Extra map[string]float64
+}
+
+// NsPerOp returns the "ns/op" metric.
+func (r benchmarkResult) NsPerOp() int64 {
+	if v, ok := r.Extra["ns/op"]; ok {
+		return int64(v)
+	}
+	if r.N <= 0 {
+		return 0
+	}
+	return int64(r.T) / int64(r.N)
+}
+
+// AllocsPerOp returns the "allocs/op" metric,
+// which is calculated as r.MemAllocs / r.N.
+func (r benchmarkResult) AllocsPerOp() int64 {
+	if v, ok := r.Extra["allocs/op"]; ok {
+		return int64(v)
+	}
+	if r.N <= 0 {
+		return 0
+	}
+	return int64(r.MemAllocs) / int64(r.N)
+}
+
+// AllocedBytesPerOp returns the "B/op" metric,
+// which is calculated as r.MemBytes / r.N.
+func (r benchmarkResult) AllocedBytesPerOp() int64 {
+	if v, ok := r.Extra["B/op"]; ok {
+		return int64(v)
+	}
+	if r.N <= 0 {
+		return 0
+	}
+	return int64(r.MemBytes) / int64(r.N)
+}
+
+func (r benchmarkResult) GcPerOp() float64 {
+	if v, ok := r.Extra["GC/op"]; ok {
+		return float64(v)
+	}
+	if r.N <= 0 {
+		return 0
+	}
+	return float64(r.MemGc) / float64(r.N)
+}
+
+func (r benchmarkResult) MfreesPerOp() float64 {
+	if v, ok := r.Extra["mfrees/op"]; ok {
+		return v
+	}
+	if r.N <= 0 {
+		return 0
+	}
+	return float64(r.Mfrees) / float64(r.N)
+}
+
+func (r benchmarkResult) MfreeBytesPerOp() int64 {
+	if v, ok := r.Extra["mfreeB/op"]; ok {
+		return int64(v)
+	}
+	if r.N <= 0 {
+		return 0
+	}
+	return int64(r.MfreeBytes) / int64(r.N)
+}
+
+func (r benchmarkResult) MfreeBytesSlicePerOp() int64 {
+	if v, ok := r.Extra["mfreeBSlice/op"]; ok {
+		return int64(v)
+	}
+	if r.N <= 0 {
+		return 0
+	}
+	return int64(r.MfreeBytesSlice) / int64(r.N)
+}
+
+func (r benchmarkResult) MfreeBytesMapDiePerOp() int64 {
+	if v, ok := r.Extra["mfreeBMapDie/op"]; ok {
+		return int64(v)
+	}
+	if r.N <= 0 {
+		return 0
+	}
+	return int64(r.MfreeBytesMapDie) / int64(r.N)
+}
+
+func (r benchmarkResult) MfreeBytesMapGrowPerOp() int64 {
+	if v, ok := r.Extra["mfreeBMapGrow/op"]; ok {
+		return int64(v)
+	}
+	if r.N <= 0 {
+		return 0
+	}
+	return int64(r.MfreeBytesMapGrow) / int64(r.N)
+}
+
+func (r benchmarkResult) printCEAMfreeStatsPerOp() {
+	if r.N <= 0 {
+		return
+	}
+	print(uint64(r.allocStats.totalNewObjNum) / uint64(r.N))
+	print(" totalNewObjNum/op")
+	print("\t")
+	print(uint64(r.allocStats.toFreeNewObjNum) / uint64(r.N))
+	print(" toFreeNewObjNum/op")
+	print("\t")
+	print(uint64(r.allocStats.trueFreeNewObjNum) / uint64(r.N))
+	print(" trueFreeNewObjNum/op")
+
+	print("\n")
+	print(uint64(r.allocStats.totalSliceNum) / uint64(r.N))
+	print(" totalSliceNum/op")
+	print("\t")
+	print(uint64(r.allocStats.toFreeSliceNum) / uint64(r.N))
+	print(" toFreeSliceNum/op")
+	print("\t")
+	print(uint64(r.allocStats.trueFreeSliceNum) / uint64(r.N))
+	print(" trueFreeSliceNum/op")
+
+	print("\n")
+	print(uint64(r.allocStats.totalGrowSliceNum) / uint64(r.N))
+	print(" totalGrowSliceNum/op")
+	print("\t")
+	print(uint64(r.allocStats.toFreeGrowSliceNum) / uint64(r.N))
+	print(" toFreeGrowSliceNum/op")
+	print("\t")
+	print(uint64(r.allocStats.trueFreeGrowSliceNum) / uint64(r.N))
+	print(" trueFreeGrowSliceNum/op")
+
+	print("\n")
+	print(uint64(r.allocStats.totalMapNum) / uint64(r.N))
+	print(" totalMapNum/op")
+	print("\t")
+	print(uint64(r.allocStats.toFreeMapNum) / uint64(r.N))
+	print(" toFreeMapNum/op")
+	print("\t")
+	print(uint64(r.allocStats.trueFreeMapNum) / uint64(r.N))
+	print(" trueFreeMapNum/op")
+
+	for freesPerHandler, count := range r.allocStats.optNumPerHandler {
+		print("\n")
+		print("freesPerHandler:", freesPerHandler, ", count:", count)
+	}
+	print("\n")
+}
+
+func (r benchmarkResult) maxHeapInUseB() int64 {
+	if v, ok := r.Extra["maxHeapInUseB"]; ok {
+		return int64(v)
+	}
+	if r.N <= 0 {
+		return 0
+	}
+	return int64(r.MaxHeapInUse)
+}
+
+// String does not include allocs/op or B/op, since those are reported
+// by MemString.
+func (r benchmarkResult) print() {
+	print("RuntimeBenchmark\t")
+
+	print(r.N)
+
+	// Get ns/op as a float.
+	ns, ok := r.Extra["ns/op"]
+	if !ok {
+		ns = float64(r.T) / float64(r.N)
+	}
+	if ns != 0 {
+		print("\t")
+		print(uint64(ns))
+		print(" ns/op")
+	}
+
+	// Print extra metrics that aren't represented in the standard
+	// metrics.
+	var extraKeys []string
+	for k := range r.Extra {
+		switch k {
+		case "ns/op", "MB/s", "B/op", "allocs/op", "GC/op", "mfrees/op", "mfreeB/op", "maxHeapInUseB", "avgHeapInUseB":
+			// Built-in metrics reported elsewhere.
+			continue
+		}
+		extraKeys = append(extraKeys, k)
+	}
+
+	gc := r.GcPerOp()
+	print("\t")
+	print(uint64(gc))
+	print(" GC/op")
+
+	mfrees := r.MfreesPerOp()
+	print("\t")
+	print(uint64(mfrees))
+	print(" mfrees/op")
+
+	mfreeBytes := r.MfreeBytesPerOp()
+	print("\t")
+	print(uint64(mfreeBytes))
+	print(" mfreeB/op")
+
+	mfreeBytesSlice := r.MfreeBytesSlicePerOp()
+	print("\t")
+	print(uint64(mfreeBytesSlice))
+	print(" mfreeBSlice/op")
+
+	mfreeBytesMapDie := r.MfreeBytesMapDiePerOp()
+	print("\t")
+	print(uint64(mfreeBytesMapDie))
+	print(" mfreeBMapDie/op")
+
+	mfreeBytesMapGrow := r.MfreeBytesMapGrowPerOp()
+	print("\t")
+	print(uint64(mfreeBytesMapGrow))
+	print(" mfreeBMapGrow/op")
+
+	maxHeapInUse := r.maxHeapInUseB()
+	print("\t")
+	print(uint64(maxHeapInUse))
+	print(" maxHeapInUseB")
+
+	avgHeapInUse := r.avgHeapInUseB()
+	print("\t")
+	print(uint64(avgHeapInUse))
+	print(" avgHeapInUseB")
+
+	r.memString()
+	print("\n")
+
+	r.printCEAMfreeStatsPerOp()
+}
+
+func (r benchmarkResult) avgHeapInUseB() int64 {
+	if v, ok := r.Extra["avgHeapInUseB"]; ok {
+		return int64(v)
+	}
+	if r.N <= 0 {
+		return 0
+	}
+	return int64(r.AvgHeapInUse)
+}
+
+func (r benchmarkResult) memString() {
+	print(" \t")
+	print(r.AllocedBytesPerOp())
+	print(" B/op\t")
+	print(r.AllocsPerOp())
+	print(" allocs/op")
+}
+
+// String returns a summary of the benchmark results.
+// It follows the benchmark result line format from
+// https://golang.org/design/14313-benchmark-format, not including the
+// benchmark name.
+// Extra metrics override built-in metrics of the same name.
 
 func init() {
 	exithook.Gosched = Gosched

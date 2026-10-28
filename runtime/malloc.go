@@ -1163,6 +1163,15 @@ func mallocgcTiny(size uintptr, typ *_type, needzero bool) (unsafe.Pointer, uint
 		x := unsafe.Pointer(c.tiny + off)
 		c.tinyoffset = off + size
 		c.tinyAllocs++
+
+		if MfStatsEnable {
+			// 10.23/10.27: mfree 统计采样（对齐 go1.24.2 参考 :1167-1171）
+			mid := int64(mp.p.ptr().id)
+			sampleMfreeStats(mid)
+			mfstats[mid].AllocCount++
+			mfstats[mid].AllocBytes += uint64(size)
+		}
+
 		mp.mallocing = 0
 		releasem(mp)
 		return x, 0
@@ -1224,6 +1233,15 @@ func mallocgcTiny(size uintptr, typ *_type, needzero bool) (unsafe.Pointer, uint
 	if c.nextSample < 0 || MemProfileRate != c.memProfRate {
 		profilealloc(mp, x, span.elemsize)
 	}
+
+	if MfStatsEnable {
+		// 10.23/10.27: mfree 统计采样（对齐 go1.24.2 参考 :1237-1242）
+		mid := int64(mp.p.ptr().id)
+		sampleMfreeStats(mid)
+		mfstats[mid].AllocCount++
+		mfstats[mid].AllocBytes += uint64(size)
+	}
+
 	mp.mallocing = 0
 	releasem(mp)
 
@@ -1278,6 +1296,17 @@ func mallocgcSmallNoscan(size uintptr, typ *_type, needzero bool) (unsafe.Pointe
 	size = uintptr(class_to_size[sizeclass])
 	spc := makeSpanClass(sizeclass, true)
 	span := c.alloc[spc]
+
+	// 10.23/10.27: freegc 显式复用链优先——若本 P 的复用链上有同 class
+	// 的死对象，直接 O(1) 弹出复用（免 GC 标记/清扫等待，免位图扫描）。
+	// 见 malloc_freegc.go（设计 freegc.md，"主动排队复用"语义）。
+	if c.hasReusableFreegc(spc) {
+		x := mallocgcSmallNoscanFreegcReuse(c, span, spc, size, needzero)
+		mp.mallocing = 0
+		releasem(mp)
+		return x, size
+	}
+
 	v := nextFreeFast(span)
 	if v == 0 {
 		v, span, checkGCTrigger = c.nextFree(spc)
@@ -1326,6 +1355,15 @@ func mallocgcSmallNoscan(size uintptr, typ *_type, needzero bool) (unsafe.Pointe
 	if c.nextSample < 0 || MemProfileRate != c.memProfRate {
 		profilealloc(mp, x, size)
 	}
+
+	if MfStatsEnable {
+		// 10.23/10.27: mfree 统计采样（对齐 go1.24.2 参考）
+		mid := int64(mp.p.ptr().id)
+		sampleMfreeStats(mid)
+		mfstats[mid].AllocCount++
+		mfstats[mid].AllocBytes += uint64(size)
+	}
+
 	mp.mallocing = 0
 	releasem(mp)
 
@@ -1417,6 +1455,15 @@ func mallocgcSmallScanNoHeader(size uintptr, typ *_type, needzero bool) (unsafe.
 	if c.nextSample < 0 || MemProfileRate != c.memProfRate {
 		profilealloc(mp, x, size)
 	}
+
+	if MfStatsEnable {
+		// 10.23/10.27: mfree 统计采样（对齐 go1.24.2 参考）
+		mid := int64(mp.p.ptr().id)
+		sampleMfreeStats(mid)
+		mfstats[mid].AllocCount++
+		mfstats[mid].AllocBytes += uint64(size)
+	}
+
 	mp.mallocing = 0
 	releasem(mp)
 
@@ -1510,6 +1557,15 @@ func mallocgcSmallScanHeader(size uintptr, typ *_type, needzero bool) (unsafe.Po
 	if c.nextSample < 0 || MemProfileRate != c.memProfRate {
 		profilealloc(mp, x, size)
 	}
+
+	if MfStatsEnable {
+		// 10.23/10.27: mfree 统计采样（对齐 go1.24.2 参考）
+		mid := int64(mp.p.ptr().id)
+		sampleMfreeStats(mid)
+		mfstats[mid].AllocCount++
+		mfstats[mid].AllocBytes += uint64(size)
+	}
+
 	mp.mallocing = 0
 	releasem(mp)
 
@@ -1584,6 +1640,15 @@ func mallocgcLarge(size uintptr, typ *_type, needzero bool) (unsafe.Pointer, uin
 	if c.nextSample < 0 || MemProfileRate != c.memProfRate {
 		profilealloc(mp, x, size)
 	}
+
+	if MfStatsEnable {
+		// 10.23/10.27: mfree 统计采样（对齐 go1.24.2 参考）
+		mid := int64(mp.p.ptr().id)
+		sampleMfreeStats(mid)
+		mfstats[mid].AllocCount++
+		mfstats[mid].AllocBytes += uint64(size)
+	}
+
 	mp.mallocing = 0
 	releasem(mp)
 
@@ -1723,6 +1788,13 @@ func memclrNoHeapPointersChunked(size uintptr, x unsafe.Pointer) {
 // compiler (both frontend and SSA backend) knows the signature
 // of this function.
 func newobject(typ *_type) unsafe.Pointer {
+	// 10.23/10.27: mfree 统计（对齐 go1.24.2 参考 newobject）
+	if MfStatsEnable {
+		mp := acquirem()
+		mpid := mp.p.ptr().id
+		mfstats[mpid].ceaAllocRecord.totalNewObjNum += 1
+		releasem(mp)
+	}
 	return mallocgc(typ.Size_, typ, true)
 }
 

@@ -333,6 +333,23 @@ var debug struct {
 	profstackdepth           int32
 	dataindependenttiming    int32
 
+	// 10.23/10.27: mfree 机制（对齐 go1.24.2 参考实现 :343-349）。
+	// 提前回收始终生效，不受这些开关控制；mfreeall/mfreeslice/mfreemapgrow
+	// 仅控制对应的调试打印，mfreetrace 打印每次 mfree 的详细日志。
+	// runimestat/runtimehistogram 开启统计与调用点直方图（proc.go schedinit 激活）。
+	mfreeall         int32
+	mfreeslice       int32
+	mfreemapgrow     int32
+	mfreemapfinal    int32
+	mfreetrace       int32
+	runtimestat      int32
+	runtimehistogram int32
+
+	// eagerfreegc 控制 freegc 小对象复用链（10.23/10.27，默认 1 开启，
+	// 见 parsedebugvars；eagerfreegc=0 运行时关闭；mfree 大对象路径
+	// 始终生效，不受此开关影响）。
+	eagerfreegc int32
+
 	// debug.malloc is used as a combined debug check
 	// in the malloc function and should be set
 	// if any of the below debug options is != 0.
@@ -369,6 +386,17 @@ var dbgvars = []*dbgVar{
 	{name: "cgocheck", value: &debug.cgocheck},
 	{name: "clobberfree", value: &debug.clobberfree},
 	{name: "dataindependenttiming", value: &debug.dataindependenttiming},
+	// 10.23/10.27: 提前回收运行时开关（默认已开；eagerfreegc=0 可临时关闭
+	// freegc 小对象复用链；mfree 大对象路径始终生效，不受此开关影响）。
+	{name: "eagerfreegc", value: &debug.eagerfreegc},
+	// 10.23/10.27: mfree 机制 GODEBUG 注册（对齐参考 :404-410）。
+	{name: "mfreeall", value: &debug.mfreeall},
+	{name: "mfreeslice", value: &debug.mfreeslice},
+	{name: "mfreemapgrow", value: &debug.mfreemapgrow},
+	{name: "mfreemapfinal", value: &debug.mfreemapfinal},
+	{name: "mfreetrace", value: &debug.mfreetrace},
+	{name: "runtimestat", value: &debug.runtimestat},
+	{name: "runtimehistogram", value: &debug.runtimehistogram},
 	{name: "disablethp", value: &debug.disablethp},
 	{name: "dontfreezetheworld", value: &debug.dontfreezetheworld},
 	{name: "efence", value: &debug.efence},
@@ -400,6 +428,9 @@ func parsedebugvars() {
 	debug.cgocheck = 1
 	debug.invalidptr = 1
 	debug.adaptivestackstart = 1 // set this to 0 to turn larger initial goroutine stacks off
+	// 10.23/10.27: mfree 提前回收默认开启——含本补丁的工具链重编后即为默认
+	// 行为，业务侧零配置，无需任何运行时参数。
+	eagerFreegcEnabled = true
 	if GOOS == "linux" {
 		// On Linux, MADV_FREE is faster than MADV_DONTNEED,
 		// but doesn't affect many of the statistics that

@@ -360,6 +360,12 @@ const (
 	mSpanDead   mSpanState = iota
 	mSpanInUse             // allocated for garbage collected heap
 	mSpanManual            // allocated for manual management (e.g., stack allocator)
+	// 10.23/10.27: mfree 两步清扫状态（对齐 go1.24.2 参考实现 :361-365）。
+	// mSpanTwoStepSweep: allocLarge span 已被 MfreeObj 提前清扫（强制视作全空），
+	//                    等待 sweeper 完成第二步（结构回收/记账）。
+	// mSpanDangling: 提前清扫已完成，mspan 结构仍在 fullSwept 链上等待回收。
+	mSpanTwoStepSweep
+	mSpanDangling
 )
 
 // mSpanStateNames are the names of the span states, indexed by
@@ -368,6 +374,8 @@ var mSpanStateNames = []string{
 	"mSpanDead",
 	"mSpanInUse",
 	"mSpanManual",
+	"mSpanTwoStepSweep",
+	"mSpanDangling",
 }
 
 // mSpanStateBox holds an atomic.Uint8 to provide atomic operations on
@@ -1621,12 +1629,20 @@ func (h *mheap) freeManual(s *mspan, typ spanAllocType) {
 func (h *mheap) freeSpanLocked(s *mspan, typ spanAllocType) {
 	assertLockHeld(&h.lock)
 
+	// 10.23/10.27: mfree 提前清扫的大对象 span 保留 mspan 结构到
+	// fullSwept 链（Dangling 状态），等第二步 sweep 时再回收结构
+	//（对齐 go1.24.2 参考实现 :1633-1636）。
+	preserveMspan := false
+	if s.state.get() == mSpanTwoStepSweep {
+		preserveMspan = true
+	}
+
 	switch s.state.get() {
 	case mSpanManual:
 		if s.allocCount != 0 {
 			throw("mheap.freeSpanLocked - invalid stack free")
 		}
-	case mSpanInUse:
+	case mSpanInUse, mSpanTwoStepSweep:
 		if s.isUserArenaChunk {
 			throw("mheap.freeSpanLocked - invalid free of user arena chunk")
 		}
@@ -1669,8 +1685,14 @@ func (h *mheap) freeSpanLocked(s *mspan, typ spanAllocType) {
 	h.pages.free(s.base(), s.npages)
 
 	// Free the span structure. We no longer have a use for it.
-	s.state.set(mSpanDead)
-	h.freeMSpanLocked(s)
+	// 10.23/10.27: mfree 提前清扫的大对象 span 保留结构（Dangling），
+	// 结构本身在第二步 sweep 中回收（对齐参考 :1686-1693）。
+	if !preserveMspan {
+		s.state.set(mSpanDead)
+		h.freeMSpanLocked(s)
+	} else {
+		s.state.set(mSpanDangling)
+	}
 }
 
 // scavengeAll acquires the heap lock (blocking any additional

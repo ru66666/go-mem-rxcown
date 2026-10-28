@@ -52,6 +52,17 @@ type mcache struct {
 	// in this mcache are stale and need to the flushed so they
 	// can be swept. This is done in acquirep.
 	flushGen atomic.Uint32
+
+	// reusableFreegc holds per-spanClass singly-linked lists of dead
+	// noscan objects recorded by freegc（mpool 提前回收扩展，10.23/10.27，
+	// 见 malloc_freegc.go，设计 freegc.md）。
+	// 链表节点复用对象自身内存（gclink），零额外分配。
+	// mcache 属于非 GC 内存（_ sys.NotInHeap），gclinkptr 指针存这里
+	// 不会被 GC 扫描——这正是复用链能"跳出 GC 视野"的关键。
+	//
+	// 挂链对象的内存归属由 freegc 交给 runtime；链上的对象可由之后任意
+	// P 的同 class 分配弹出，复用时再通过 spanOf 找回真实 span。
+	reusableFreegc [numSpanClasses]gclinkptr
 }
 
 // A gclink is a node in a linked list of blocks, like mlink,
@@ -73,6 +84,20 @@ type gclinkptr uintptr
 // in other data structures.
 func (p gclinkptr) ptr() *gclink {
 	return (*gclink)(unsafe.Pointer(p))
+}
+
+// addReusableNoscan records a dead noscan object (identified by its slot
+// address v) on this mcache's per-spanClass reuse list（10.23/10.27，见
+// malloc_freegc.go）。下次本 P 的 mallocgcSmallNoscan 从链上 O(1) 弹出复用。
+//
+// 必须在 mallocing 持有（acquirem）状态下调用；调用方已校验 v 位于
+// 本 mcache 当前缓存的 spc span 内。
+func (c *mcache) addReusableNoscan(spc spanClass, v uintptr) {
+	// gclink 节点即对象自身内存：把槽位首两个字当成 next 指针用，
+	// 零额外分配。对象已逻辑死亡，内容不再有意义。
+	l := gclinkptr(v)
+	l.ptr().next = c.reusableFreegc[spc]
+	c.reusableFreegc[spc] = l
 }
 
 type stackfreelist struct {
@@ -151,6 +176,11 @@ func (c *mcache) refill(spc spanClass) {
 
 	if s.allocCount != s.nelems {
 		throw("refill of span with free space remaining")
+	}
+	// 与官方 runtime.freegc 一致：当前 span 要换出时，不能留下仍指向
+	// 旧 span 的显式复用节点。tiny class 的链也一并清空。
+	if c.reusableFreegc[spc] != 0 {
+		throw("refill of span with reusable pointers remaining on free list")
 	}
 	if s != &emptymspan {
 		// Mark this span as no longer cached.
@@ -305,6 +335,9 @@ func (c *mcache) releaseAll() {
 	c.tiny = 0
 	c.tinyoffset = 0
 
+	// 与官方 runtime.freegc 一致：flush/release 时清空显式复用链。
+	// 链表节点就是对象自身内存，因此只清空头指针即可。
+	clear(c.reusableFreegc[:])
 	// Flush tinyAllocs.
 	stats := memstats.heapStats.acquire()
 	atomic.Xadd64(&stats.tinyAllocCount, int64(c.tinyAllocs))

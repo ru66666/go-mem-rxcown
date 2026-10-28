@@ -48,6 +48,206 @@ type mstats struct {
 
 var memstats mstats
 
+// ============================ mfree 统计与结果码（10.23/10.27，对齐
+// go1.24.2 参考实现 mstats.go:49-140，见 malloc_mfree.go） ============================
+
+const GMPMAX = 256
+
+// Mfree* 结果码：MfreeObj/MfreeSlice/MfreeMapGrow 的返回值（runtime 导出）。
+const (
+	MfreeSuccess = iota
+	MfreeGcRunning
+	MfreeOnStack
+	MfreeTiny
+	MfreeHaveSpecial
+	MfreeNotInMcache
+	MfreeNotInAllocCache
+	MfreeAlreadyMfreed
+	MfreeLargeNotInUse
+	MfreeFailedToLockLarge
+	MfreeResultCodeEnd
+)
+
+// HistogramItem mfree 调用点直方图条目（按 program point 聚合）。
+type HistogramItem struct {
+	programPoint string
+	tries        uint64
+	results      [10]uint64
+	size         uint64
+	category     string
+	lineLock     uint64
+}
+
+var MfStatsEnable bool
+var HistogramEnable bool
+
+// MfreeStats mfree 统计汇总（ReadMfreeStats 聚合结果，导出供 benchmark 读取）。
+type MfreeStats struct {
+	Time uint64
+
+	AllocCount    uint64
+	AllocBytes    uint64
+	FreeBytes     uint64
+	MfreeCount    uint64
+	MfreeBytes    uint64
+	MfreeBytesCat [4]uint64
+
+	SampleCount     uint64
+	AllocSample     uint64
+	HeapInUseSample uint64
+
+	MaxHeapInUse uint64
+	AvgHeapInUse uint64
+
+	ceaAllocRecord allocOptInfo
+}
+
+var Histogram [][10000]HistogramItem
+var HistogramLen []uint64
+
+type ProgramPointCacheItem struct {
+	addr         uintptr
+	programPoint string
+	category     string
+}
+
+const PPCSIZE = 512
+
+var ProgramPointCache [][PPCSIZE]ProgramPointCacheItem
+var ProgramPointCacheHead []uint64
+var ProgramPointCacheTail []uint64
+
+var StackTraceBufferCache [][2048]byte
+
+var mfstats []MfreeStats
+
+func ClearMfreeStats() {
+	for m := 0; m < GMPMAX+1; m++ {
+		mfstats[m].Time = uint64(nanotime())
+
+		mfstats[m].AllocCount = 0
+		mfstats[m].AllocBytes = 0
+		mfstats[m].FreeBytes = 0
+		mfstats[m].MfreeCount = 0
+		mfstats[m].MfreeBytes = 0
+		mfstats[m].MfreeBytesCat[0] = 0
+		mfstats[m].MfreeBytesCat[1] = 0
+		mfstats[m].MfreeBytesCat[2] = 0
+		mfstats[m].MfreeBytesCat[3] = 0
+
+		mfstats[m].SampleCount = 0
+		mfstats[m].AllocSample = 0
+		mfstats[m].HeapInUseSample = 0
+
+		mfstats[m].MaxHeapInUse = 0
+		mfstats[m].AvgHeapInUse = 0
+		mfstats[m].ceaAllocRecord.optNumPerHandler = make(map[int]uint)
+		mfstats[m].ceaAllocRecord.toFreeNewObjNum = 0
+		mfstats[m].ceaAllocRecord.toFreeMapNum = 0
+		mfstats[m].ceaAllocRecord.toFreeSliceNum = 0
+		mfstats[m].ceaAllocRecord.trueFreeNewObjNum = 0
+		mfstats[m].ceaAllocRecord.trueFreeMapNum = 0
+		mfstats[m].ceaAllocRecord.trueFreeSliceNum = 0
+		mfstats[m].ceaAllocRecord.totalNewObjNum = 0
+		mfstats[m].ceaAllocRecord.totalMapNum = 0
+		mfstats[m].ceaAllocRecord.totalSliceNum = 0
+		mfstats[m].ceaAllocRecord.totalGrowSliceNum = 0
+	}
+}
+
+func ClearMfreeHistogram() {
+	for m := 0; m < GMPMAX+1; m++ {
+		HistogramLen[m] = 0
+		ProgramPointCacheHead[m] = 0
+		ProgramPointCacheTail[m] = PPCSIZE
+	}
+}
+
+func ReadMfreeStats() MfreeStats {
+	var stats MfreeStats
+	stats.ceaAllocRecord.optNumPerHandler = make(map[int]uint)
+
+	startTime := uint64(0)
+	for m := 0; m < GMPMAX; m++ {
+		if mfstats[m].Time > startTime {
+			startTime = mfstats[m].Time
+			stats.Time = uint64(nanotime()) - startTime
+		}
+
+		stats.AllocCount += mfstats[m].AllocCount
+		stats.AllocBytes += mfstats[m].AllocBytes
+		stats.FreeBytes += mfstats[m].FreeBytes
+		stats.MfreeCount += mfstats[m].MfreeCount
+		stats.MfreeBytes += mfstats[m].MfreeBytes
+		stats.MfreeBytesCat[0] += mfstats[m].MfreeBytesCat[0]
+		stats.MfreeBytesCat[1] += mfstats[m].MfreeBytesCat[1]
+		stats.MfreeBytesCat[2] += mfstats[m].MfreeBytesCat[2]
+		stats.MfreeBytesCat[3] += mfstats[m].MfreeBytesCat[3]
+
+		stats.SampleCount += mfstats[m].SampleCount
+		stats.AllocSample += mfstats[m].AllocSample
+		stats.HeapInUseSample += mfstats[m].HeapInUseSample
+
+		if mfstats[m].MaxHeapInUse > stats.MaxHeapInUse {
+			stats.MaxHeapInUse = mfstats[m].MaxHeapInUse
+		}
+
+		stats.ceaAllocRecord.toFreeNewObjNum += mfstats[m].ceaAllocRecord.toFreeNewObjNum
+		stats.ceaAllocRecord.toFreeSliceNum += mfstats[m].ceaAllocRecord.toFreeSliceNum
+		stats.ceaAllocRecord.toFreeMapNum += mfstats[m].ceaAllocRecord.toFreeMapNum
+		stats.ceaAllocRecord.toFreeGrowSliceNum += mfstats[m].ceaAllocRecord.toFreeGrowSliceNum
+
+		stats.ceaAllocRecord.trueFreeNewObjNum += mfstats[m].ceaAllocRecord.trueFreeNewObjNum
+		stats.ceaAllocRecord.trueFreeSliceNum += mfstats[m].ceaAllocRecord.trueFreeSliceNum
+		stats.ceaAllocRecord.trueFreeMapNum += mfstats[m].ceaAllocRecord.trueFreeMapNum
+		stats.ceaAllocRecord.trueFreeGrowSliceNum += mfstats[m].ceaAllocRecord.trueFreeGrowSliceNum
+
+		stats.ceaAllocRecord.totalNewObjNum += mfstats[m].ceaAllocRecord.totalNewObjNum
+		stats.ceaAllocRecord.totalSliceNum += mfstats[m].ceaAllocRecord.totalSliceNum
+		stats.ceaAllocRecord.totalMapNum += mfstats[m].ceaAllocRecord.totalMapNum
+		stats.ceaAllocRecord.totalGrowSliceNum += mfstats[m].ceaAllocRecord.totalGrowSliceNum
+
+		for perHandlerFreeNum, count := range mfstats[m].ceaAllocRecord.optNumPerHandler {
+			stats.ceaAllocRecord.optNumPerHandler[perHandlerFreeNum] += count
+		}
+	}
+
+	if stats.SampleCount > 0 {
+		stats.AvgHeapInUse = stats.HeapInUseSample / stats.SampleCount
+	}
+	return stats
+}
+
+func initMFStatsGlobals() {
+	mfstats = make([]MfreeStats, GMPMAX+1)
+	if debug.runtimehistogram > 0 {
+		StackTraceBufferCache = make([][2048]byte, GMPMAX+1)
+		ProgramPointCacheTail = make([]uint64, GMPMAX+1)
+		ProgramPointCacheHead = make([]uint64, GMPMAX+1)
+		ProgramPointCache = make([][512]ProgramPointCacheItem, GMPMAX+1)
+		Histogram = make([][10000]HistogramItem, GMPMAX+1)
+		HistogramLen = make([]uint64, GMPMAX+1)
+	}
+}
+
+func EnableMfreeStats(enable bool) {
+	MfStatsEnable = enable
+}
+
+func EnableMfreeStatsHistogram(enable bool) {
+	HistogramEnable = enable
+}
+
+func sampleMfreeStats(mid int64) {
+	mfstats[mid].SampleCount++
+	heapInUse := atomic.Load64(&memstats.lastHeapInUse)
+	mfstats[mid].HeapInUseSample += heapInUse
+	maxHeapInUse := mfstats[mid].MaxHeapInUse
+	if heapInUse > maxHeapInUse {
+		mfstats[mid].MaxHeapInUse = heapInUse
+	}
+}
+
 // A MemStats records statistics about the memory allocator.
 type MemStats struct {
 	// General statistics.

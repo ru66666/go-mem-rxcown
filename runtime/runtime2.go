@@ -505,6 +505,14 @@ type g struct {
 	// and check for debt in the malloc hot path. The assist ratio
 	// determines how this corresponds to scan work debt.
 	gcAssistBytes int64
+
+	// 10.23/10.27: mfree 机制配套（见 malloc_mfree.go）。
+	// gls_frames 保存 memOpt 帧上下文（MfreeMapGrow 等按 program point
+	// 归类释放来源用）；alloc_info 记录编译器插入的 toFree 统计。
+	// （MfreeObj 核心路径不依赖这两个字段，但保持与参考实现
+	// go1.24.2 分支的 P/G 结构一致，便于统计/追踪扩展。）
+	gls_frames memOptFrames
+	alloc_info allocOptInfo
 }
 
 // gTrackingPeriod is the number of transitions out of _Grunning between
