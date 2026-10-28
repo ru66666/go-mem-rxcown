@@ -16,6 +16,7 @@ import sys
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
 
 TOTAL_RE = re.compile(
     r"\[GC\.Total\] Pools: (\d+), PoolBytes: (\d+) "
@@ -23,9 +24,15 @@ TOTAL_RE = re.compile(
 
 
 def parse_snapshots(path):
-    """读取日志，按聚合快照顺序返回 [(poolBytes, inUse, empty)]（字节）。"""
+    """读取日志，按聚合快照顺序返回 [(numgc, poolBytes, inUse, empty)]。
+
+    快照起点兼容两种格式：
+      1. 带 "memPool stats dump" 头（完整版/聚合版正常输出）
+      2. 10.22.log 这类缺头的日志：直接用 [GC.Heap] 里的 NumGC 行识别
+    """
     snaps = []
     cur = None
+    numgc = None
     in_block = False
     with open(path, encoding="utf-8", errors="replace") as f:
         for raw in f:
@@ -33,9 +40,11 @@ def parse_snapshots(path):
             i = line.find("]: ")
             if i != -1:
                 line = line[i + 3:]
-            if "memPool stats dump" in line:
+            if "memPool stats dump" in line or "NumGC: " in line:
                 in_block = True
                 cur = None
+                m = re.search(r"NumGC: (\d+)", line)
+                numgc = int(m.group(1)) if m else None
                 continue
             if not in_block:
                 continue
@@ -45,7 +54,7 @@ def parse_snapshots(path):
                 continue
             if "===============================" in line:
                 if cur is not None:
-                    snaps.append(cur)
+                    snaps.append((numgc,) + cur)
                 in_block = False
     if not snaps:
         raise SystemExit("日志中没有找到 [GC.Total] 快照")
@@ -59,11 +68,12 @@ def main():
     out_path = sys.argv[2] if len(sys.argv) > 2 else "slots.png"
 
     snaps = parse_snapshots(log_path)
-    x = list(range(1, len(snaps) + 1))
+    x = [s[0] if s[0] is not None else i + 1
+         for i, s in enumerate(snaps)]
     mb = lambda v: v / 2 ** 20
-    pb = [mb(s[0]) for s in snaps]
-    inuse = [mb(s[1]) for s in snaps]
-    empty = [mb(s[2]) for s in snaps]
+    pb = [mb(s[1]) for s in snaps]
+    inuse = [mb(s[2]) for s in snaps]
+    empty = [mb(s[3]) for s in snaps]
 
     fig, ax = plt.subplots(figsize=(11, 5.5))
     ax.plot(x, pb, color="#6366f1", marker="o", ms=3, lw=1.8,
@@ -77,8 +87,9 @@ def main():
     ax.fill_between(x, inuse, color="#10b981", alpha=0.10)
 
     ax.set_title("Pool slot usage: total = inUse + empty (per GC snapshot)")
-    ax.set_xlabel("GC snapshot #")
+    ax.set_xlabel("NumGC (GC count)")
     ax.set_ylabel("MB")
+    ax.xaxis.set_major_locator(MaxNLocator(integer=True))  # 刻度只取整数
     ax.grid(linestyle="--", alpha=0.4)
     ax.legend()
     plt.tight_layout()

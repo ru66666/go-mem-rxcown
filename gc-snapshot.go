@@ -542,6 +542,26 @@ func printAgg(b *bufio.Writer, prefix string, cur *sampleSnapshot) {
 	ch, ev, en := s4SpanCacheSnapshot()
 	b.WriteString(fmt.Sprintf("[GC.SpanCache] hit: %d, evict: %d, cached: %d\n", ch, ev, en))
 
+	// [s4改] [GC.EagerFree]：runtime 提前回收效果（10.23，L1 主路径）
+	// ok/bytes = 已直接归还 allocator 的 mem；failGC = GC 运行中错过（退复用链）；
+	// failSkip = runtime 未生效（GODEBUG 关/不在 mcache 等）
+	_, _, efgc, efgcBytes, ems, emsBytes, eml, emlBytes, _, _ := s4EagerFreeSnapshot()
+	b.WriteString(fmt.Sprintf("[GC.EagerFree.Detail] freegc: %d (%d bytes), mfreeSmall: %d (%d bytes), mfreeLarge: %d (%d bytes)\n",
+		efgc, efgcBytes, ems, emsBytes, eml, emlBytes))
+	// 累计提前释放量与当前快照的规模对照，便于估算提前释放对 pool/Go heap
+	// 的覆盖程度。bytes 是进程生命周期累计值，PoolBytes/HeapInuse 是当前值，
+	// 因此这里只做规模参考，不能把累计值当作当前仍占用的内存。
+	directBytes := efgcBytes + emsBytes + emlBytes
+	poolPct, heapPct := 0.0, 0.0
+	if cur.total.totalBytes != 0 {
+		poolPct = float64(directBytes) * 100 / float64(cur.total.totalBytes)
+	}
+	if h.heapInuse != 0 {
+		heapPct = float64(directBytes) * 100 / float64(h.heapInuse)
+	}
+	b.WriteString(fmt.Sprintf("[GC.EagerFree.Estimate] directBytes: %d, poolBytes: %d, heapInuse: %d, direct/pool: %.2f%%, direct/heapInuse: %.2f%%\n",
+		directBytes, cur.total.totalBytes, h.heapInuse, poolPct, heapPct))
+
 	// [GC.Pool.Top]：按累计释放字节排前 3 的 pool 名字
 	type topPool struct {
 		name  string

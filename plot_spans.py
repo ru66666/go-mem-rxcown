@@ -16,6 +16,7 @@ import sys
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
 
 NUMGC_RE = re.compile(r"\[GC\.Heap\].*NumGC: (\d+)")
 TOTAL_RE = re.compile(
@@ -23,7 +24,12 @@ TOTAL_RE = re.compile(
 
 
 def parse_snapshots(path):
-    """读取日志，按快照顺序返回 [(numgc, mallocSpan, freeSpan)]。"""
+    """读取日志，按快照顺序返回 [(numgc, mallocSpan, freeSpan)]。
+
+    快照起点兼容两种格式：
+      1. 带 "memPool stats dump" 头
+      2. 缺头的日志（如 10.22.log）：直接用 [GC.Heap] 里的 NumGC 行识别
+    """
     snaps = []
     in_block = False
     numgc = None
@@ -34,7 +40,7 @@ def parse_snapshots(path):
             i = line.find("]: ")
             if i != -1:
                 line = line[i + 3:]
-            if "memPool stats dump" in line:
+            if "memPool stats dump" in line or "NumGC: " in line:
                 in_block = True
                 numgc = None
                 total = None
@@ -80,6 +86,7 @@ def main():
     ax.set_title("mallocSpan / freeSpan over GC count (per GC snapshot)")
     ax.set_xlabel("NumGC (GC count)")
     ax.set_ylabel("spans")
+    ax.xaxis.set_major_locator(MaxNLocator(integer=True))  # 刻度只取整数
     ax.grid(linestyle="--", alpha=0.4)
     ax.legend(loc="upper left")
     plt.tight_layout()

@@ -9,6 +9,7 @@ package pool
 
 import (
 	"sync/atomic"
+	"unsafe" // 10.23: 需要 &s.mem[0] 地址；//go:linkname 绑定 runtime.EagerFreeObj 亦依赖
 )
 
 /* ============================ 通用辅助 ============================ */
@@ -102,6 +103,112 @@ func s4SpanCacheDrop(n int) {
 	for i := 0; i < n; i++ {
 		atomic.AddUint64(&s4SpanCacheStats.entry, ^uint64(0))
 	}
+}
+
+/* ============================ 提前回收（10.23/10.27，双机制组合方案） ============================ */
+//
+// 工具链（go1.24.2，含 mfree 内置 + freegc 复用链补丁）导出：
+//   - runtime.FreegcEx(objP, size)：小对象（<32KiB）→ freegc 显式复用链，
+//     下次同 P 同 spanClass 的 malloc O(1) 弹出复用（主动排队复用，
+//     对齐 freegc.md 的 free list 设计）。
+//   - runtime.MfreeObj(objP, 0, 0)：大对象（>32KiB）→ 两步清扫，页立即回
+//     mheap + heapLive/heapInUse 记账下调 + scavenger 唤醒（RSS 立降）。
+//
+// 无需任何构建参数/环境变量/GODEBUG——工具链默认行为即生效
+//（GODEBUG=eagerfreegc=0 可运行时关闭，两机制共用）。
+//
+// 级联（mpool.go free 分支）：
+//   L1 s4SpanEagerFree（按尺寸路由到上述两机制）→ 立即回收（理想路径）
+//   L2 失败 → freeSpans 复用链（128KB/arena 预算）→ 震荡场景兜底
+//   L3 链满 → clear() 丢 GC（原路径）
+//
+// 安全性：两机制所有失败路径保证 span 状态未被修改，返回非 Success 时
+// 本层照旧走 L2/L3，无额外风险；成功路径下 mem 所有权移交 runtime，
+// 此后不得再触碰（本层置 nil）。
+
+// s4EagerFreeOn 提前回收开关（true=启用；一键关闭避免多余调用）
+var s4EagerFreeOn = true
+
+// s4EagerFreeStats 提前回收统计（[GC.EagerFree] 行）
+var s4EagerFreeStats struct {
+	ok              uint64 // 成功次数（mem 已归还 runtime）
+	bytes           uint64 // 成功归还字节
+	freegc          uint64 // freegc 显式复用链成功次数
+	mfreeSmall      uint64 // mfree 小对象位图翻转成功次数
+	mfreeLarge      uint64 // mfree 大对象两步清扫成功次数
+	freegcBytes     uint64
+	mfreeSmallBytes uint64
+	mfreeLargeBytes uint64
+	failGC          uint64 // MfreeGcRunning / MfreeFailedToLockLarge（本次跳过，退 L2/L3）
+	failSkip        uint64 // 其他失败码（不在 mcache/specials/GODEBUG 关等）
+}
+
+// s4EagerFreeObj 提前回收统一入口（10.23/10.27）。
+// runtime 侧由 export_eargc.go 的 EagerFreeObj 按尺寸路由到 freegc 链（小）
+// 或 MfreeObj 两步清扫（大）；签名 uintptr,uintptr → uintptr，linkname 绑定。
+//
+//go:linkname s4EagerFreeObj runtime.EagerFreeObj
+func s4EagerFreeObj(objP uintptr, size uintptr) uintptr
+
+// s4EagerFreeResultCode 导出层结果码（与 runtime/export_eargc.go 常量对齐）
+const (
+	s4EagerFreeSuccess     = 0 // 成功：内存已归还
+	s4EagerFreeGcRunning   = 1 // GC 运行中
+	s4EagerFreeNotInMcache = 2 // 小对象不在当前 P 的 mcache（freegc/mfree 位图路径共用此码）
+	s4EagerFreeFailedLock  = 3 // 大对象 sweep 所有权竞争
+	s4EagerFreeSkipped     = 6 // 通用失败（GODEBUG 关等）
+	s4EagerFreeFreegc      = 7
+	s4EagerFreeMfreeSmall  = 8
+	s4EagerFreeMfreeLarge  = 9
+)
+
+// s4SpanEagerFree 对整 span 的 mem 执行提前回收。
+// 返回 true 表示成功（mem 所有权已移交 runtime，调用方不得再 clear/触碰 mem）；
+// 返回 false 表示未生效（调用方走 L2 复用链 / L3 clear）。
+func s4SpanEagerFree(s *span, spanBytes int) bool {
+	if !s4EagerFreeOn || s.mem == nil {
+		return false
+	}
+	code := s4EagerFreeObj(uintptr(unsafe.Pointer(&s.mem[0])), uintptr(spanBytes))
+	switch code {
+	case s4EagerFreeSuccess, s4EagerFreeFreegc, s4EagerFreeMfreeSmall, s4EagerFreeMfreeLarge:
+		atomic.AddUint64(&s4EagerFreeStats.ok, 1)
+		atomic.AddUint64(&s4EagerFreeStats.bytes, uint64(spanBytes))
+		switch code {
+		case s4EagerFreeFreegc:
+			atomic.AddUint64(&s4EagerFreeStats.freegc, 1)
+			atomic.AddUint64(&s4EagerFreeStats.freegcBytes, uint64(spanBytes))
+		case s4EagerFreeMfreeSmall:
+			atomic.AddUint64(&s4EagerFreeStats.mfreeSmall, 1)
+			atomic.AddUint64(&s4EagerFreeStats.mfreeSmallBytes, uint64(spanBytes))
+		case s4EagerFreeMfreeLarge:
+			atomic.AddUint64(&s4EagerFreeStats.mfreeLarge, 1)
+			atomic.AddUint64(&s4EagerFreeStats.mfreeLargeBytes, uint64(spanBytes))
+		}
+		// 所有权已移交 runtime：置 nil，防止后续 clear/复用链双重持有
+		s.mem = nil
+		s.objects = nil
+		return true
+	case s4EagerFreeGcRunning, s4EagerFreeFailedLock, s4EagerFreeNotInMcache:
+		atomic.AddUint64(&s4EagerFreeStats.failGC, 1)
+	default: // s4EagerFreeSkipped 等
+		atomic.AddUint64(&s4EagerFreeStats.failSkip, 1)
+	}
+	return false
+}
+
+// s4EagerFreeSnapshot 返回提前回收统计快照（gc-snapshot 聚合段用）
+func s4EagerFreeSnapshot() (ok, bytes, freegc, freegcBytes, mfreeSmall, mfreeSmallBytes, mfreeLarge, mfreeLargeBytes, failGC, failSkip uint64) {
+	return atomic.LoadUint64(&s4EagerFreeStats.ok),
+		atomic.LoadUint64(&s4EagerFreeStats.bytes),
+		atomic.LoadUint64(&s4EagerFreeStats.freegc),
+		atomic.LoadUint64(&s4EagerFreeStats.freegcBytes),
+		atomic.LoadUint64(&s4EagerFreeStats.mfreeSmall),
+		atomic.LoadUint64(&s4EagerFreeStats.mfreeSmallBytes),
+		atomic.LoadUint64(&s4EagerFreeStats.mfreeLarge),
+		atomic.LoadUint64(&s4EagerFreeStats.mfreeLargeBytes),
+		atomic.LoadUint64(&s4EagerFreeStats.failGC),
+		atomic.LoadUint64(&s4EagerFreeStats.failSkip)
 }
 
 /* ============================ span 统计（写路径） ============================ */

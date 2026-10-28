@@ -21,7 +21,12 @@ PREFIX_RE = re.compile(r"\[22132\]: ")  # 日志前缀（进程号），按需�
 
 
 def parse_last_snapshot(path):
-    """读取日志，返回最后一个聚合快照的 [(objectSize, mallocSpan)]，按 size 升序。"""
+    """读取日志，返回最后一个聚合快照的 [(objectSize, mallocSpan)]，按 size 升序。
+
+    快照起点兼容两种格式：
+      1. 带 "memPool stats dump" 头
+      2. 缺头的日志（如 10.22.log）：直接用 [GC.Heap] 里的 NumGC 行识别
+    """
     span = {}
     in_block = False
     found = False
@@ -31,7 +36,7 @@ def parse_last_snapshot(path):
             i = line.find("]: ")
             if i != -1:
                 line = line[i + 3:]
-            if "memPool stats dump" in line:
+            if "memPool stats dump" in line or "NumGC: " in line:
                 in_block = True
                 span = {}
                 continue

@@ -1049,7 +1049,16 @@ func (a *arena) free(ptr uintptr) {
 	if s.free(ptr) {
 		a.remove(s)
 		s4ArenaSpanFree(a)
-		s.clear() // 10.21方案B（freeSpan复用链）暂不启用，恢复原版clear丢给GC
+		// 10.23新增：整 span 回收三级级联（提前回收，免死等 GC 标记）：
+		//   L1 runtime 提前回收（小对象=freegc 复用链 / 大对象=mfree 两步清扫）
+		//   L2 失败 → freeSpans 复用链（128KB/arena 预算，震荡场景兜底）
+		//   L3 链满 → clear() 原路径丢 GC（现状）
+		spanBytes := int(a.spanSize) * (int(a.objectSize) + reservedLen)
+		if !s4SpanEagerFree(s, spanBytes) {
+			if !s4SpanRecycle(&a.freeSpans, s, spanBytes) {
+				s.clear()
+			}
+		}
 		a.idxPool = append(a.idxPool, idx)
 		atomic.AddUint32(&a.spanNum, ^uint32(0))
 	} else {
