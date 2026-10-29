@@ -441,3 +441,5 @@ Oct 22 07:53:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86
 Oct 22 07:53:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Mix] refill: 2242843, recycled 1x: 92834, 2x: 103029, 4x: 13503, >4x: 6246
 Oct 22 07:53:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: [GC.Pool.Top] TableLocalSession:Sm5GCmDs104:record, TableLocalSession:Sm5GCmDs1290:record, TableLocalSession:Sm5GCmDs1475:record
 Oct 22 07:53:42 unc-vnf-x86-pbu-c-s--1 docker/k8s_sm-component_sm2-pod-1_smf-x86_93968ff3-0281-4dff-922d-9bbaac3d4ff8_0/6f1aefdc0205[22132]: ===============================
+
+7上量开始 19结束 33去活开始
